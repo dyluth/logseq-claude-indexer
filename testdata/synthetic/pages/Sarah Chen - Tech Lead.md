@@ -1,0 +1,46 @@
+- # Sarah Chen - Tech Lead
+-
+- ## Contact
+	- Email: sarah.chen@company.example
+	- Slack: @sarahchen
+	- GitHub: @schen-tech
+-
+- ## Role
+	- Technical Lead for [[Project Phoenix]]
+	- Architecture decisions
+	- Mentoring [[Engineering Team]]
+	- Reports to: [[VP of Engineering]]
+-
+- ## Expertise
+	- [[Microservices Architecture]]
+	- [[Distributed Systems]]
+	- [[Go]] programming
+	- [[Kubernetes]] and [[Cloud Architecture]]
+	- [[System Design Interview]] preparation
+-
+- ## Current Focus
+	- Leading [[Sprint 23]] technical implementation
+	- [[API Design Best Practices]] evangelism
+	- [[Performance Optimization]] initiatives
+	- Mentoring [[Marcus Liu - Backend Dev]]
+-
+- ## Meeting Notes
+	- Weekly 1:1s every Monday 2pm
+	- Architecture reviews Wednesdays 10am
+	- Sprint planning every other Friday
+-
+- ## Action Items
+	- TODO Review [[Database Migration]] proposal
+	- TODO Approve [[Mobile App]] architecture
+	- DOING Write [[Technical RFC]] for [[Event Sourcing]]
+	- LATER Plan [[Engineering Team]] offsite
+-
+- ## Projects
+	- Primary: [[Project Phoenix]]
+	- Advisory: [[Observability Stack]]
+	- Mentoring: [[Junior Engineers Program]]
+-
+- ## Resources
+	- Blog: https://sarahchen.tech
+	- Talks: [[Conference Presentations]]
+	- Internal wiki: [[Sarah Chen - Knowledge Base]]

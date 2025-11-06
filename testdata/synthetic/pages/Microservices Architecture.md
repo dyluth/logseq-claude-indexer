@@ -1,0 +1,79 @@
+- # Microservices Architecture
+-
+- ## Overview
+	- Architectural style for building distributed systems
+	- Used in: [[Project Phoenix]], [[Observability Stack]]
+	- Team expertise: [[Sarah Chen - Tech Lead]], [[DevOps Team]]
+-
+- ## Key Concepts
+	- Service boundaries
+	- Data ownership
+	- API contracts
+	- Event-driven communication
+	- See: [[Event Sourcing]]
+-
+- ## Our Stack
+	- Language: [[Go]] for services
+	- Frontend: [[React]] + [[TypeScript]]
+	- Container orchestration: [[Kubernetes]]
+	- Service mesh: Istio
+	- Message queue: RabbitMQ
+	- Database: [[PostgreSQL]] per service
+-
+- ## Communication Patterns
+	- Synchronous:
+		- [[REST API]] for simple requests
+		- [[GraphQL]] for complex queries
+		- gRPC for service-to-service
+	- Asynchronous:
+		- Event bus for domain events
+		- Message queues for background jobs
+		- Webhooks for external integrations
+-
+- ## Service Catalog
+	- [[Authentication Service]]
+	- [[User Analytics]] service
+	- [[API Gateway]]
+	- Notification service
+	- Billing service
+	- [[Mobile App]] BFF (Backend for Frontend)
+-
+- ## Challenges & Solutions
+	- Distributed tracing: [[Distributed Tracing]] with OpenTelemetry
+	- Service discovery: Kubernetes DNS + Istio
+	- Configuration management: ConfigMaps + Secrets
+	- Monitoring: [[Observability Stack]]
+	- Testing: Contract tests + integration tests
+-
+- ## Migration Strategy
+	- From monolith to microservices
+	- Strangler fig pattern
+	- See: [[Database Migration]] strategy
+	- Timeline: 18 months
+-
+- ## Best Practices
+	- Single responsibility per service
+	- Database per service pattern
+	- API versioning from day 1
+	- See: [[API Design Best Practices]]
+	- Chaos engineering for resilience
+	- Circuit breakers and bulkheads
+-
+- ## Resources
+	- Books:
+		- "Building Microservices" by Sam Newman
+		- "Designing Data-Intensive Applications" by Martin Kleppmann
+	- Internal docs: [[Microservices Architecture - Deep Dive]]
+	- Training: [[Engineering Team]] workshops
+-
+- ## Related Concepts
+	- [[Distributed Systems]]
+	- [[Performance Optimization]]
+	- [[Cloud Architecture]]
+	- [[System Design Interview]] preparation
+-
+- ## Action Items
+	- TODO Document [[Authentication Service]] API contract
+	- DOING Implement [[Distributed Tracing]] across all services
+	- LATER Evaluate service mesh alternatives
+	- LATER Create runbook for common failure scenarios

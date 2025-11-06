@@ -1,0 +1,65 @@
+- # API Design Best Practices
+-
+- ## Core Principles
+	- Consistency over cleverness
+	- Design for clients, not servers
+	- Version early, version often
+	- Document everything
+-
+- ## RESTful Design
+	- Use proper HTTP verbs: GET, POST, PUT, PATCH, DELETE
+	- Resource-oriented URLs
+	- Proper status codes
+	- HATEOAS when appropriate
+	- See: [[REST API]] patterns
+-
+- ## GraphQL Considerations
+	- When to use [[GraphQL]] vs [[REST API]]:
+		- GraphQL: Complex data requirements, [[Mobile App]]
+		- REST: Simple CRUD, public APIs, caching important
+	- Schema design best practices
+	- N+1 query problem solutions
+	- See: [[GraphQL]] implementation guide
+-
+- ## Security
+	- Authentication: OAuth2, JWT
+	- Authorization: RBAC, ABAC
+	- Rate limiting and throttling
+	- Input validation
+	- See: [[Authentication Service]] implementation
+-
+- ## Performance
+	- Caching strategies: ETags, Cache-Control
+	- Pagination: cursor vs offset
+	- Compression: gzip, brotli
+	- Connection pooling
+	- See: [[Performance Optimization]]
+-
+- ## Documentation
+	- OpenAPI/Swagger for [[REST API]]
+	- GraphQL schema introspection
+	- Code examples in multiple languages
+	- Postman collections
+	- See: [[API Documentation]]
+-
+- ## Versioning
+	- URL versioning: `/v1/users`
+	- Header versioning: `Accept: application/vnd.api+json; version=1`
+	- Deprecation policy: 6 months notice
+	- Sunset headers
+-
+- ## Error Handling
+	- Consistent error format
+	- Meaningful error messages
+	- Error codes and categories
+	- Stack traces in development only
+-
+- ## Related Projects
+	- Implemented in: [[Project Phoenix]]
+	- Examples: [[Project Phoenix - API Spec]]
+	- Team lead: [[Sarah Chen - Tech Lead]]
+-
+- ## Action Items
+	- TODO Update internal guidelines with [[GraphQL]] patterns
+	- TODO Create workshop for [[Engineering Team]]
+	- LATER Build API design linter tool

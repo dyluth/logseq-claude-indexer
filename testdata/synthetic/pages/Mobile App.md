@@ -1,0 +1,86 @@
+- {{query (and (task TODO NOW LATER DOING) [[Mobile App]])}}
+-
+- # Mobile App
+-
+- ## Overview
+	- Cross-platform mobile client for [[Project Phoenix]]
+	- Tech: React Native + [[TypeScript]]
+	- Platforms: iOS 14+, Android 10+
+	- Release target: [[Dec 15th, 2025]]
+-
+- ## Team
+	- PM: [[Jennifer Park - Product Manager]]
+	- Tech Lead: [[Sarah Chen - Tech Lead]]
+	- Developers: [[Mobile Dev Team]]
+	- Designer: [[UX Team]]
+-
+- ## Architecture
+	- Backend: [[GraphQL]] API via [[API Gateway]]
+	- State management: Redux Toolkit
+	- Navigation: React Navigation v6
+	- Offline support: Redux Persist + SQLite
+	- See: [[Mobile App - Technical Design]]
+-
+- ## Features
+	- Core (Beta):
+		- User authentication via [[Authentication Service]]
+		- Dashboard with [[User Analytics]]
+		- Real-time notifications
+		- Offline mode
+	- Planned:
+		- Push notifications
+		- Biometric authentication
+		- Advanced filtering
+		- Data export
+-
+- ## Performance Goals
+	- App launch: <2s cold start
+	- API calls: <500ms p95
+	- Bundle size: <15MB iOS, <20MB Android
+	- Crash-free rate: >99.5%
+	- See: [[Performance Optimization]]
+-
+- ## Development
+	- Repo: https://github.com/company/mobile-app
+	- CI/CD: GitHub Actions
+	- Testing: Jest + React Native Testing Library
+	- E2E: Detox
+-
+- ## Current Sprint - [[Sprint 23]]
+	- NOW [#A] Implement authentication flow
+	- DOING Integrate [[User Analytics]] dashboard
+	- TODO Add offline sync
+	- TODO Performance testing
+-
+- ## Dependencies
+	- Backend: [[Project Phoenix]] [[API Gateway]]
+	- Auth: [[Authentication Service]]
+	- Analytics: [[User Analytics]]
+	- Monitoring: [[Observability Stack]]
+-
+- ## Release Plan
+	- Beta (internal): [[Nov 30th, 2025]]
+	- TestFlight/Beta: [[Dec 10th, 2025]]
+	- Public release: [[Dec 15th, 2025]]
+	- See: [[Mobile App - Release Checklist]]
+-
+- ## Action Items
+	- NOW [#A] Complete authentication screens
+	  :LOGBOOK:
+	  CLOCK: [2025-11-01 Fri 09:00:00]
+	  :END:
+	- TODO Set up code signing for iOS
+	- TODO Configure Google Play Store listing
+	- LATER Implement dark mode
+	- LATER Add accessibility features
+-
+- ## Metrics
+	- Daily Active Users (DAU) target: 10k
+	- Monthly Active Users (MAU) target: 50k
+	- Retention D7: >40%
+	- Retention D30: >25%
+-
+- ## Resources
+	- Design: [[Mobile App - Figma Designs]]
+	- API Docs: [[Project Phoenix - API Spec]]
+	- User stories: [[Mobile App - User Stories]]

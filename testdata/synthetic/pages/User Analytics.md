@@ -1,0 +1,75 @@
+- # User Analytics
+-
+- ## Overview
+	- Real-time analytics engine for [[Project Phoenix]]
+	- Tracks user behavior and system metrics
+	- Powers dashboards in web app and [[Mobile App]]
+-
+- ## Architecture
+	- Data ingestion: Event streaming via Kafka
+	- Processing: Apache Flink
+	- Storage: ClickHouse (OLAP)
+	- Query layer: [[GraphQL]] API
+	- Visualization: Custom [[React]] dashboards
+-
+- ## Metrics Tracked
+	- User engagement:
+		- Daily/Monthly Active Users (DAU/MAU)
+		- Session duration
+		- Feature usage
+		- Conversion funnels
+	- System performance:
+		- API latency (p50, p95, p99)
+		- Error rates
+		- Throughput
+	- Business metrics:
+		- Revenue per user
+		- Churn rate
+		- Customer acquisition cost
+-
+- ## Implementation
+	- Event schema: JSON with Avro validation
+	- Real-time: <5 second latency
+	- Retention: 90 days hot, 2 years cold
+	- Privacy: PII scrubbing, GDPR compliance
+-
+- ## Dashboard Features
+	- Real-time metrics
+	- Custom date ranges
+	- Segment filtering
+	- Export to CSV/PDF
+	- Scheduled reports
+	- See: [[User Analytics - Dashboard Design]]
+-
+- ## Current Sprint - [[Sprint 23]]
+	- NOW [#A] Implement dashboard MVP
+	  :LOGBOOK:
+	  CLOCK: [2025-11-01 Fri 13:00:00]--[2025-11-01 Fri 18:00:00] =>  05:00:00
+	  :END:
+	- DOING Add funnel analysis
+	- TODO Implement cohort analysis
+	- LATER Add predictive analytics with ML
+-
+- ## Technical Challenges
+	- Scale: 100k events/second peak
+	- Query performance: <500ms p95
+	- Cost optimization: $10k/month budget
+	- See: [[Performance Optimization]]
+-
+- ## Team
+	- Lead: [[Sarah Chen - Tech Lead]]
+	- Backend: [[Marcus Liu - Backend Dev]]
+	- Data Engineering: [[Data Team]]
+	- Product: [[Jennifer Park - Product Manager]]
+-
+- ## Action Items
+	- TODO Optimize ClickHouse queries for [[Mobile App]]
+	- DOING Set up alerting for anomaly detection
+	- LATER Implement custom events API
+	- LATER Add A/B testing framework
+-
+- ## Related
+	- [[Project Phoenix]]
+	- [[Microservices Architecture]]
+	- [[Observability Stack]]
+	- [[Data Privacy Policy]]
