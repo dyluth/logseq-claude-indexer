@@ -156,25 +156,29 @@ func TestBuildTimeTrackingIndex_MultipleProjects(t *testing.T) {
 }
 
 func TestBuildTimeTrackingIndex_WeeklyAggregation(t *testing.T) {
-	// Week of Nov 4-10, 2025 (Monday Nov 4)
-	monday := time.Date(2025, 11, 4, 10, 0, 0, 0, time.UTC)
+	// Week of Nov 3-9, 2025 (Monday Nov 3)
+	// Nov 4 is Tuesday, Nov 6 is Wednesday, Nov 9 is Sunday
+	tuesday := time.Date(2025, 11, 4, 10, 0, 0, 0, time.UTC)
 	wednesday := time.Date(2025, 11, 6, 14, 0, 0, 0, time.UTC)
-	sunday := time.Date(2025, 11, 10, 9, 0, 0, 0, time.UTC)
+	sunday := time.Date(2025, 11, 9, 9, 0, 0, 0, time.UTC)
 
 	// Different week (Oct 27 - Nov 2, Monday Oct 27)
 	previousMonday := time.Date(2025, 10, 27, 10, 0, 0, 0, time.UTC)
 
+	// Next week (Nov 10-16, Monday Nov 10)
+	nextMonday := time.Date(2025, 11, 10, 11, 0, 0, 0, time.UTC)
+
 	tasks := []models.Task{
 		{
-			Description: "Task in week 1",
+			Description: "Task on Tuesday (week of Nov 3)",
 			Status:      models.StatusDONE,
 			PageRefs:    []string{"Project A"},
 			Logbook: []models.LogbookEntry{
-				{Start: monday, Duration: 4 * time.Hour},
+				{Start: tuesday, Duration: 4 * time.Hour},
 			},
 		},
 		{
-			Description: "Another task in week 1",
+			Description: "Task on Wednesday (week of Nov 3)",
 			Status:      models.StatusDONE,
 			PageRefs:    []string{"Project A"},
 			Logbook: []models.LogbookEntry{
@@ -182,7 +186,7 @@ func TestBuildTimeTrackingIndex_WeeklyAggregation(t *testing.T) {
 			},
 		},
 		{
-			Description: "Task on Sunday (still week 1)",
+			Description: "Task on Sunday (week of Nov 3)",
 			Status:      models.StatusDONE,
 			PageRefs:    []string{"Project B"},
 			Logbook: []models.LogbookEntry{
@@ -190,26 +194,34 @@ func TestBuildTimeTrackingIndex_WeeklyAggregation(t *testing.T) {
 			},
 		},
 		{
-			Description: "Task in previous week",
+			Description: "Task in previous week (Oct 27)",
 			Status:      models.StatusDONE,
 			PageRefs:    []string{"Project C"},
 			Logbook: []models.LogbookEntry{
 				{Start: previousMonday, Duration: 5 * time.Hour},
 			},
 		},
+		{
+			Description: "Task in next week (Nov 10)",
+			Status:      models.StatusDONE,
+			PageRefs:    []string{"Project D"},
+			Logbook: []models.LogbookEntry{
+				{Start: nextMonday, Duration: 1 * time.Hour},
+			},
+		},
 	}
 
 	index := BuildTimeTrackingIndex(tasks)
 
-	// Should have 2 weeks
-	if len(index.WeeklySummary) != 2 {
-		t.Errorf("Expected 2 weeks, got %d", len(index.WeeklySummary))
+	// Should have 3 weeks
+	if len(index.WeeklySummary) != 3 {
+		t.Errorf("Expected 3 weeks, got %d", len(index.WeeklySummary))
 	}
 
-	// Week of Nov 4 should have 9 hours total (4 + 3 + 2)
-	week1Key := "2025-11-04" // Monday Nov 4
+	// Week of Nov 3 should have 9 hours total (4 + 3 + 2)
+	week1Key := "2025-11-03" // Monday Nov 3
 	if index.ByWeek[week1Key] != 9*time.Hour {
-		t.Errorf("Expected 9h for week of Nov 4, got %v", index.ByWeek[week1Key])
+		t.Errorf("Expected 9h for week of Nov 3, got %v", index.ByWeek[week1Key])
 	}
 
 	// Week of Oct 27 should have 5 hours
@@ -218,7 +230,13 @@ func TestBuildTimeTrackingIndex_WeeklyAggregation(t *testing.T) {
 		t.Errorf("Expected 5h for week of Oct 27, got %v", index.ByWeek[week2Key])
 	}
 
-	// Most productive week should be Nov 4 week
+	// Week of Nov 10 should have 1 hour
+	week3Key := "2025-11-10" // Monday Nov 10
+	if index.ByWeek[week3Key] != 1*time.Hour {
+		t.Errorf("Expected 1h for week of Nov 10, got %v", index.ByWeek[week3Key])
+	}
+
+	// Most productive week should be Nov 3 week
 	if index.Statistics.MostProductiveWeek.TimeLogged != 9*time.Hour {
 		t.Errorf("Expected most productive week to have 9h, got %v",
 			index.Statistics.MostProductiveWeek.TimeLogged)

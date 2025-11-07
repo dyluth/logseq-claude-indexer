@@ -161,6 +161,7 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	graphIndex := indexer.BuildReferenceGraph(allRefs, files)
 	timelineIndex := indexer.BuildTimelineIndex(allTasks, files)
 	missingPagesIndex := indexer.BuildMissingPagesIndex(graphIndex, 5)
+	timeTrackingIndex := indexer.BuildTimeTrackingIndex(allTasks)
 
 	if dryRun {
 		logger.Println("\n=== DRY RUN MODE ===")
@@ -168,6 +169,9 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		logger.Printf("Would create reference graph with %d nodes", len(graphIndex.Nodes))
 		logger.Printf("Would create timeline with %d days", len(timelineIndex.Entries))
 		logger.Printf("Would create missing pages report with %d pages", len(missingPagesIndex.MissingPages))
+		logger.Printf("Would create time tracking report (%.1f%% adoption, %d tracked)",
+			timeTrackingIndex.Statistics.AdoptionRate,
+			timeTrackingIndex.Statistics.TasksWithTracking)
 		return nil
 	}
 
@@ -212,11 +216,23 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	}
 	logger.Printf("✓ Created %s", filepath.Join(absOutputDir, "missing-pages.md"))
 
+	// Write time tracking
+	if err := writer.WriteTimeTracking(timeTrackingIndex, absOutputDir); err != nil {
+		return fmt.Errorf("writing time tracking: %w", err)
+	}
+	logger.Printf("✓ Created %s", filepath.Join(absOutputDir, "time-tracking.md"))
+
 	// Write reference graph
 	if err := writer.WriteReferenceGraph(graphIndex, absOutputDir); err != nil {
 		return fmt.Errorf("writing reference graph: %w", err)
 	}
 	logger.Printf("✓ Created %s", filepath.Join(absOutputDir, "reference-graph.md"))
+
+	// Write dashboard (aggregated overview)
+	if err := writer.WriteDashboard(taskIndex, graphIndex, timelineIndex, missingPagesIndex, timeTrackingIndex, absOutputDir); err != nil {
+		return fmt.Errorf("writing dashboard: %w", err)
+	}
+	logger.Printf("✓ Created %s", filepath.Join(absOutputDir, "dashboard.md"))
 
 	logger.Println("Index generation complete!")
 
