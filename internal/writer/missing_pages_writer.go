@@ -2,8 +2,10 @@ package writer
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/dyluth/logseq-claude-indexer/internal/indexer"
@@ -18,25 +20,21 @@ func WriteMissingPages(index *indexer.MissingPagesIndex, outputDir string) error
 
 	filePath := filepath.Join(outputDir, "missing-pages.md")
 
-	f, err := os.Create(filePath)
-	if err != nil {
-		return fmt.Errorf("creating file: %w", err)
-	}
-	defer f.Close()
+	var buf strings.Builder
 
 	// Write header
-	fmt.Fprintf(f, "# Missing Pages to Create\n\n")
-	fmt.Fprintf(f, "Generated: %s\n\n", time.Now().Format(time.RFC3339))
+	fmt.Fprintf(&buf, "# Missing Pages to Create\n\n")
+	fmt.Fprintf(&buf, "Generated: %s\n\n", time.Now().Format(time.RFC3339))
 
 	if len(index.MissingPages) == 0 {
-		fmt.Fprintf(f, "*No missing pages with %d+ references found.*\n", index.Threshold)
-		return nil
+		fmt.Fprintf(&buf, "*No missing pages with %d+ references found.*\n", index.Threshold)
+		return writeIfChanged(filePath, buf.String())
 	}
 
-	fmt.Fprintf(f, "**Pages with %d+ references that don't exist yet**: %d\n\n",
+	fmt.Fprintf(&buf, "**Pages with %d+ references that don't exist yet**: %d\n\n",
 		index.Threshold, len(index.MissingPages))
 
-	fmt.Fprintf(f, "---\n\n")
+	fmt.Fprintf(&buf, "---\n\n")
 
 	// Group by page type
 	byType := make(map[string][]indexer.MissingPage)
@@ -59,20 +57,23 @@ func WriteMissingPages(index *indexer.MissingPagesIndex, outputDir string) error
 			continue
 		}
 
-		fmt.Fprintf(f, "## %s (%d)\n\n", typeLabels[pageType], len(pages))
+		fmt.Fprintf(&buf, "## %s (%d)\n\n", typeLabels[pageType], len(pages))
 
 		for _, page := range pages {
-			writeMissingPage(f, page)
+			writeMissingPage(&buf, page)
 		}
 
-		fmt.Fprintf(f, "---\n\n")
+		fmt.Fprintf(&buf, "---\n\n")
 	}
 
+	if err := writeIfChanged(filePath, buf.String()); err != nil {
+		return fmt.Errorf("writing file: %w", err)
+	}
 	return nil
 }
 
 // writeMissingPage writes a single missing page entry
-func writeMissingPage(f *os.File, page indexer.MissingPage) {
+func writeMissingPage(f io.Writer, page indexer.MissingPage) {
 	fmt.Fprintf(f, "### [[%s]]\n", page.Name)
 	fmt.Fprintf(f, "- **References**: %d\n", page.ReferenceCount)
 

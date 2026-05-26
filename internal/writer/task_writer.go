@@ -2,8 +2,10 @@ package writer
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/dyluth/logseq-claude-indexer/internal/indexer"
@@ -19,18 +21,14 @@ func WriteTaskIndex(index *indexer.TaskIndex, outputDir string) error {
 
 	filePath := filepath.Join(outputDir, "tasks-by-status.md")
 
-	f, err := os.Create(filePath)
-	if err != nil {
-		return fmt.Errorf("creating file: %w", err)
-	}
-	defer f.Close()
+	var buf strings.Builder
 
 	// Write header
-	fmt.Fprintf(f, "# Tasks by Status\n\n")
-	fmt.Fprintf(f, "Generated: %s\n\n", index.GeneratedAt.Format(time.RFC3339))
+	fmt.Fprintf(&buf, "# Tasks by Status\n\n")
+	fmt.Fprintf(&buf, "Generated: %s\n\n", index.GeneratedAt.Format(time.RFC3339))
 
 	// Write statistics section
-	writeStatistics(f, index)
+	writeStatistics(&buf, index)
 
 	// Write tasks by status in priority order
 	statuses := []struct {
@@ -47,14 +45,17 @@ func WriteTaskIndex(index *indexer.TaskIndex, outputDir string) error {
 	for _, s := range statuses {
 		tasks := index.ByStatus[s.status]
 		if len(tasks) > 0 {
-			fmt.Fprintf(f, "## %s (%d)\n\n", s.label, len(tasks))
+			fmt.Fprintf(&buf, "## %s (%d)\n\n", s.label, len(tasks))
 			for _, task := range tasks {
-				writeLeanTask(f, task)
+				writeLeanTask(&buf, task)
 			}
-			fmt.Fprintf(f, "---\n\n")
+			fmt.Fprintf(&buf, "---\n\n")
 		}
 	}
 
+	if err := writeIfChanged(filePath, buf.String()); err != nil {
+		return fmt.Errorf("writing file: %w", err)
+	}
 	return nil
 }
 
@@ -67,26 +68,22 @@ func WritePriorityIndex(index *indexer.TaskIndex, outputDir string) error {
 
 	filePath := filepath.Join(outputDir, "tasks-by-priority.md")
 
-	f, err := os.Create(filePath)
-	if err != nil {
-		return fmt.Errorf("creating file: %w", err)
-	}
-	defer f.Close()
+	var buf strings.Builder
 
 	// Write header
-	fmt.Fprintf(f, "# High Priority Tasks [#A]\n\n")
-	fmt.Fprintf(f, "Generated: %s\n\n", index.GeneratedAt.Format(time.RFC3339))
+	fmt.Fprintf(&buf, "# High Priority Tasks [#A]\n\n")
+	fmt.Fprintf(&buf, "Generated: %s\n\n", index.GeneratedAt.Format(time.RFC3339))
 
 	// Get high priority tasks
 	highPriorityTasks := index.ByPriority[models.PriorityHigh]
-	fmt.Fprintf(f, "**Total High Priority**: %d tasks\n\n", len(highPriorityTasks))
+	fmt.Fprintf(&buf, "**Total High Priority**: %d tasks\n\n", len(highPriorityTasks))
 
 	if len(highPriorityTasks) == 0 {
-		fmt.Fprintf(f, "*No high priority tasks found.*\n")
-		return nil
+		fmt.Fprintf(&buf, "*No high priority tasks found.*\n")
+		return writeIfChanged(filePath, buf.String())
 	}
 
-	fmt.Fprintf(f, "---\n\n")
+	fmt.Fprintf(&buf, "---\n\n")
 
 	// Group by status
 	statuses := []struct {
@@ -110,19 +107,22 @@ func WritePriorityIndex(index *indexer.TaskIndex, outputDir string) error {
 		}
 
 		if len(statusTasks) > 0 {
-			fmt.Fprintf(f, "## %s (%d)\n\n", s.label, len(statusTasks))
+			fmt.Fprintf(&buf, "## %s (%d)\n\n", s.label, len(statusTasks))
 			for _, task := range statusTasks {
-				writeFullTask(f, task)
+				writeFullTask(&buf, task)
 			}
-			fmt.Fprintf(f, "---\n\n")
+			fmt.Fprintf(&buf, "---\n\n")
 		}
 	}
 
+	if err := writeIfChanged(filePath, buf.String()); err != nil {
+		return fmt.Errorf("writing file: %w", err)
+	}
 	return nil
 }
 
 // writeStatistics writes the statistics section
-func writeStatistics(f *os.File, index *indexer.TaskIndex) {
+func writeStatistics(f io.Writer, index *indexer.TaskIndex) {
 	stats := index.Statistics
 
 	fmt.Fprintf(f, "## Statistics\n\n")
@@ -170,7 +170,7 @@ func writeStatistics(f *os.File, index *indexer.TaskIndex) {
 }
 
 // writeLeanTask writes a task with truncated description (token-optimized)
-func writeLeanTask(f *os.File, task models.Task) {
+func writeLeanTask(f io.Writer, task models.Task) {
 	description := task.Description
 	if len(description) > 100 {
 		description = description[:97] + "..."
@@ -192,7 +192,7 @@ func writeLeanTask(f *os.File, task models.Task) {
 }
 
 // writeFullTask writes a task with full details (for high priority tasks)
-func writeFullTask(f *os.File, task models.Task) {
+func writeFullTask(f io.Writer, task models.Task) {
 	fmt.Fprintf(f, "### %s\n", task.Description)
 	fmt.Fprintf(f, "- **File**: `%s:%d`\n", task.SourceFile, task.LineNumber)
 

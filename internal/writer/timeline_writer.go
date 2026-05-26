@@ -2,8 +2,10 @@ package writer
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/dyluth/logseq-claude-indexer/internal/indexer"
@@ -19,15 +21,11 @@ func WriteTimelineRecent(index *indexer.TimelineIndex, outputDir string) error {
 
 	filePath := filepath.Join(outputDir, "timeline-recent.md")
 
-	f, err := os.Create(filePath)
-	if err != nil {
-		return fmt.Errorf("creating file: %w", err)
-	}
-	defer f.Close()
+	var buf strings.Builder
 
 	// Write header
-	fmt.Fprintf(f, "# Recent Activity Timeline\n\n")
-	fmt.Fprintf(f, "Generated: %s\n\n", index.GeneratedAt.Format(time.RFC3339))
+	fmt.Fprintf(&buf, "# Recent Activity Timeline\n\n")
+	fmt.Fprintf(&buf, "Generated: %s\n\n", index.GeneratedAt.Format(time.RFC3339))
 
 	// Get last 7 days
 	sevenDaysAgo := time.Now().AddDate(0, 0, -7)
@@ -39,18 +37,21 @@ func WriteTimelineRecent(index *indexer.TimelineIndex, outputDir string) error {
 	}
 
 	if len(recentDays) == 0 {
-		fmt.Fprintf(f, "*No activity in the last 7 days.*\n")
-		return nil
+		fmt.Fprintf(&buf, "*No activity in the last 7 days.*\n")
+		return writeIfChanged(filePath, buf.String())
 	}
 
-	fmt.Fprintf(f, "**Last 7 Days**: %d days with activity\n\n", len(recentDays))
-	fmt.Fprintf(f, "---\n\n")
+	fmt.Fprintf(&buf, "**Last 7 Days**: %d days with activity\n\n", len(recentDays))
+	fmt.Fprintf(&buf, "---\n\n")
 
 	// Write each day in detail
 	for _, day := range recentDays {
-		writeDayDetail(f, day)
+		writeDayDetail(&buf, day)
 	}
 
+	if err := writeIfChanged(filePath, buf.String()); err != nil {
+		return fmt.Errorf("writing file: %w", err)
+	}
 	return nil
 }
 
@@ -63,34 +64,33 @@ func WriteTimelineFull(index *indexer.TimelineIndex, outputDir string) error {
 
 	filePath := filepath.Join(outputDir, "timeline-full.md")
 
-	f, err := os.Create(filePath)
-	if err != nil {
-		return fmt.Errorf("creating file: %w", err)
-	}
-	defer f.Close()
+	var buf strings.Builder
 
 	// Write header
-	fmt.Fprintf(f, "# Complete Activity Timeline\n\n")
-	fmt.Fprintf(f, "Generated: %s\n\n", index.GeneratedAt.Format(time.RFC3339))
+	fmt.Fprintf(&buf, "# Complete Activity Timeline\n\n")
+	fmt.Fprintf(&buf, "Generated: %s\n\n", index.GeneratedAt.Format(time.RFC3339))
 
 	if len(index.Entries) == 0 {
-		fmt.Fprintf(f, "*No activity recorded.*\n")
-		return nil
+		fmt.Fprintf(&buf, "*No activity recorded.*\n")
+		return writeIfChanged(filePath, buf.String())
 	}
 
-	fmt.Fprintf(f, "**Total Days**: %d days with activity\n\n", len(index.Entries))
-	fmt.Fprintf(f, "---\n\n")
+	fmt.Fprintf(&buf, "**Total Days**: %d days with activity\n\n", len(index.Entries))
+	fmt.Fprintf(&buf, "---\n\n")
 
 	// Write each day with condensed format
 	for _, day := range index.Entries {
-		writeDayCondensed(f, day)
+		writeDayCondensed(&buf, day)
 	}
 
+	if err := writeIfChanged(filePath, buf.String()); err != nil {
+		return fmt.Errorf("writing file: %w", err)
+	}
 	return nil
 }
 
 // writeDayDetail writes a single day with full task details
-func writeDayDetail(f *os.File, day indexer.TimelineDay) {
+func writeDayDetail(f io.Writer, day indexer.TimelineDay) {
 	// Date header
 	fmt.Fprintf(f, "## %s\n\n", day.Date.Format("Monday, January 2, 2006"))
 	fmt.Fprintf(f, "**Journal**: `%s`\n\n", day.JournalPath)
@@ -121,7 +121,7 @@ func writeDayDetail(f *os.File, day indexer.TimelineDay) {
 }
 
 // writeDayCondensed writes a single day in condensed format
-func writeDayCondensed(f *os.File, day indexer.TimelineDay) {
+func writeDayCondensed(f io.Writer, day indexer.TimelineDay) {
 	// Date header (shorter format)
 	fmt.Fprintf(f, "## %s\n\n", day.Date.Format("2006-01-02 (Mon)"))
 
@@ -143,7 +143,7 @@ func writeDayCondensed(f *os.File, day indexer.TimelineDay) {
 }
 
 // writeTimelineTask writes a task in lean timeline format
-func writeTimelineTask(f *os.File, task models.Task) {
+func writeTimelineTask(f io.Writer, task models.Task) {
 	description := task.Description
 	if len(description) > 80 {
 		description = description[:77] + "..."
