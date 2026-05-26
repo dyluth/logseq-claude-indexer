@@ -63,9 +63,13 @@ func BuildMissingPagesIndex(graph *ReferenceGraph, threshold int) *MissingPagesI
 		index.MissingPages = append(index.MissingPages, missingPage)
 	}
 
-	// Sort by reference count descending
+	// Sort by reference count descending; use page name as tiebreaker so the
+	// result is stable across runs regardless of map-iteration order.
 	sort.Slice(index.MissingPages, func(i, j int) bool {
-		return index.MissingPages[i].ReferenceCount > index.MissingPages[j].ReferenceCount
+		if index.MissingPages[i].ReferenceCount != index.MissingPages[j].ReferenceCount {
+			return index.MissingPages[i].ReferenceCount > index.MissingPages[j].ReferenceCount
+		}
+		return index.MissingPages[i].Name < index.MissingPages[j].Name
 	})
 
 	return index

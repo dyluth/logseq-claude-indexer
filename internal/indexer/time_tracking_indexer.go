@@ -118,8 +118,13 @@ func BuildTimeTrackingIndex(tasks []models.Task) *TimeTrackingIndex {
 			AvgTimePerTask: avgTime,
 		})
 	}
+	// Sort by time logged descending; use project name as tiebreaker so the
+	// result is stable across runs regardless of map-iteration order.
 	sort.Slice(index.TopProjects, func(i, j int) bool {
-		return index.TopProjects[i].TimeLogged > index.TopProjects[j].TimeLogged
+		if index.TopProjects[i].TimeLogged != index.TopProjects[j].TimeLogged {
+			return index.TopProjects[i].TimeLogged > index.TopProjects[j].TimeLogged
+		}
+		return index.TopProjects[i].Project < index.TopProjects[j].Project
 	})
 
 	// Build WeeklySummary sorted chronologically

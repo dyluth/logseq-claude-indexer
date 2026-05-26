@@ -27,8 +27,12 @@ func WriteTimelineRecent(index *indexer.TimelineIndex, outputDir string) error {
 	fmt.Fprintf(&buf, "# Recent Activity Timeline\n\n")
 	fmt.Fprintf(&buf, "Generated: %s\n\n", index.GeneratedAt.Format(time.RFC3339))
 
-	// Get last 7 days
-	sevenDaysAgo := time.Now().AddDate(0, 0, -7)
+	// Get last 7 days.  Snap the cutoff to UTC midnight so two runs that
+	// are seconds apart always produce the same set of included days.
+	// Journal dates are also parsed as UTC midnight (extractDateFromJournalPath),
+	// so an exact midnight-to-midnight comparison is what we want.
+	now := time.Now().UTC()
+	sevenDaysAgo := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC).AddDate(0, 0, -7)
 	var recentDays []indexer.TimelineDay
 	for _, day := range index.Entries {
 		if day.Date.After(sevenDaysAgo) || day.Date.Equal(sevenDaysAgo) {

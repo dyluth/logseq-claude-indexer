@@ -3,7 +3,12 @@ package writer
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"time"
+
+	"github.com/dyluth/logseq-claude-indexer/internal/indexer"
+	"github.com/dyluth/logseq-claude-indexer/pkg/models"
 )
 
 func TestStripGeneratedLine(t *testing.T) {
@@ -124,5 +129,123 @@ func TestWriteIfChanged_WritesWhenContentDiffers(t *testing.T) {
 	got, _ := os.ReadFile(path)
 	if string(got) != v2 {
 		t.Errorf("file should have been updated to v2, got: %q", string(got))
+	}
+}
+
+// TestWriteIfChanged_SkipsBoldGeneratedVariant covers the dashboard.md format
+// which uses **Generated**: instead of Generated:.
+func TestWriteIfChanged_SkipsBoldGeneratedVariant(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "dashboard.md")
+
+	v1 := "# Dashboard\n\n**Generated**: 2024-01-01T00:00:00Z\n\nStats\n"
+	if err := os.WriteFile(path, []byte(v1), 0644); err != nil {
+		t.Fatal(err)
+	}
+	info1, _ := os.Stat(path)
+
+	v2 := "# Dashboard\n\n**Generated**: 2025-06-15T12:00:00Z\n\nStats\n"
+	if err := writeIfChanged(path, v2); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	info2, _ := os.Stat(path)
+
+	if !info2.ModTime().Equal(info1.ModTime()) {
+		t.Error("dashboard: file written when only **Generated** timestamp changed")
+	}
+}
+
+// TestTimelineRecentDeterministic verifies that WriteTimelineRecent produces
+// identical output on consecutive calls (only the timestamp should differ,
+// which writeIfChanged ignores).
+func TestTimelineRecentDeterministic(t *testing.T) {
+	// Build a small timeline index with a journal entry from 3 days ago.
+	threeAgo := time.Now().UTC().AddDate(0, 0, -3).Truncate(24 * time.Hour)
+
+	tasks := []models.Task{
+		{
+			Status:      models.StatusTODO,
+			Description: "Write tests",
+			SourceFile:  threeAgo.Format("journals/2006_01_02.md"),
+			LineNumber:  1,
+		},
+	}
+	files := []models.File{
+		{
+			Path:         threeAgo.Format("journals/2006_01_02.md"),
+			Type:         models.FileTypeJournal,
+			AbsolutePath: threeAgo.Format("/repo/journals/2006_01_02.md"),
+		},
+	}
+
+	dir := t.TempDir()
+
+	// First write (file does not exist yet → always writes).
+	idx1 := indexer.BuildTimelineIndex(tasks, files)
+	if err := WriteTimelineRecent(idx1, dir); err != nil {
+		t.Fatalf("first write: %v", err)
+	}
+	content1, _ := os.ReadFile(filepath.Join(dir, "timeline-recent.md"))
+
+	// Second write (file exists, content should match except timestamp).
+	idx2 := indexer.BuildTimelineIndex(tasks, files)
+	if err := WriteTimelineRecent(idx2, dir); err != nil {
+		t.Fatalf("second write: %v", err)
+	}
+	content2, _ := os.ReadFile(filepath.Join(dir, "timeline-recent.md"))
+
+	// The file on disk after the second write should still be the first write's
+	// content (writeIfChanged skipped the write), OR at minimum the non-timestamp
+	// portions should be identical.
+	stripped1 := stripGeneratedLine(string(content1))
+	stripped2 := stripGeneratedLine(string(content2))
+	if stripped1 != stripped2 {
+		t.Errorf("timeline-recent.md content differs between runs (ignoring timestamp):\n--- run1 ---\n%s\n--- run2 ---\n%s",
+			stripped1, stripped2)
+	}
+}
+
+// TestMissingPagesSortDeterministic verifies that BuildMissingPagesIndex
+// produces a stable ordering when pages share the same reference count.
+func TestMissingPagesSortDeterministic(t *testing.T) {
+	// Create a graph where multiple missing pages share the same ref count.
+	refs := []models.PageReference{
+		{SourcePage: "A", TargetPage: "Zara"},
+		{SourcePage: "B", TargetPage: "Zara"},
+		{SourcePage: "C", TargetPage: "Zara"},
+		{SourcePage: "D", TargetPage: "Zara"},
+		{SourcePage: "E", TargetPage: "Zara"},
+		// "Alpha" and "Beta" both get 5 refs — tie on count
+		{SourcePage: "A", TargetPage: "Alpha"},
+		{SourcePage: "B", TargetPage: "Alpha"},
+		{SourcePage: "C", TargetPage: "Alpha"},
+		{SourcePage: "D", TargetPage: "Alpha"},
+		{SourcePage: "E", TargetPage: "Alpha"},
+		{SourcePage: "A", TargetPage: "Beta"},
+		{SourcePage: "B", TargetPage: "Beta"},
+		{SourcePage: "C", TargetPage: "Beta"},
+		{SourcePage: "D", TargetPage: "Beta"},
+		{SourcePage: "E", TargetPage: "Beta"},
+	}
+	files := []models.File{} // no files → all pages are "missing"
+
+	// Run the build 10 times and check that the order is always the same.
+	var firstOrder []string
+	for i := 0; i < 10; i++ {
+		graph := indexer.BuildReferenceGraph(refs, files)
+		idx := indexer.BuildMissingPagesIndex(graph, 5)
+
+		var names []string
+		for _, p := range idx.MissingPages {
+			names = append(names, p.Name)
+		}
+
+		if firstOrder == nil {
+			firstOrder = names
+			continue
+		}
+		if strings.Join(names, ",") != strings.Join(firstOrder, ",") {
+			t.Errorf("iteration %d: order changed\ngot:  %v\nwant: %v", i, names, firstOrder)
+		}
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -70,15 +71,14 @@ func WriteReferenceGraph(graph *indexer.ReferenceGraph, outputDir string) error 
 		}
 	}
 
-	// Sort by total connections descending
-	// Simple bubble sort for small datasets
-	for i := 0; i < len(entries)-1; i++ {
-		for j := 0; j < len(entries)-i-1; j++ {
-			if entries[j].totalConns < entries[j+1].totalConns {
-				entries[j], entries[j+1] = entries[j+1], entries[j]
-			}
+	// Sort by total connections descending; use page name as tiebreaker so
+	// the result is stable across runs regardless of map-iteration order.
+	sort.Slice(entries, func(i, j int) bool {
+		if entries[i].totalConns != entries[j].totalConns {
+			return entries[i].totalConns > entries[j].totalConns
 		}
-	}
+		return entries[i].name < entries[j].name
+	})
 
 	// Write top 20 most connected pages
 	limit := 20

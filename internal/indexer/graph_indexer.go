@@ -90,9 +90,13 @@ func findHubPages(nodes map[string]*GraphNode, topN int) []string {
 		}
 	}
 
-	// Sort by count descending
+	// Sort by count descending; use page name as tiebreaker so the result
+	// is stable across runs regardless of map-iteration order.
 	sort.Slice(counts, func(i, j int) bool {
-		return counts[i].count > counts[j].count
+		if counts[i].count != counts[j].count {
+			return counts[i].count > counts[j].count
+		}
+		return counts[i].pageName < counts[j].pageName
 	})
 
 	// Take top N
