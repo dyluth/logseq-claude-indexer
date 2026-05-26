@@ -355,7 +355,7 @@ TestDashboardCrossReferences() → Links to other indexes
 ⏱️ **Time Allocation**
 - Project Phoenix: 37.2%
 - Mobile App: 19.9%
-- Hearth Insights: 15.4%
+- Test Company: 15.4%
 ```
 
 ---

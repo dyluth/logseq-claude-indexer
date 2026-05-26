@@ -34,8 +34,9 @@ func ParseReferences(content string, filePath string) ([]models.PageReference, e
 
 // extractPageNameFromPath converts a file path to a page name
 // Examples:
-//   journals/2025_04_06.md -> "2025_04_06"
-//   pages/Hearth Insights.md -> "Hearth Insights"
+//
+//	journals/2025_04_06.md -> "2025_04_06"
+//	pages/Test Company.md -> "Test Company"
 func extractPageNameFromPath(filePath string) string {
 	base := filepath.Base(filePath)
 	return strings.TrimSuffix(base, ".md")

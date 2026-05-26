@@ -78,7 +78,7 @@ The `dashboard.md` file is the **single source of truth** for a quick overview o
 1. **[[Project Phoenix]]** - 58h (40.7%) ⭐ Highest focus
 2. **[[Mobile App]]** - 42h (29.5%) 🚀 Active development
 3. **[[Sprint 23]]** - 28h (19.6%) 📋 Planning
-4. **[[Hearth Insights]]** - 14h (9.8%)
+4. **[[Test Company]]** - 14h (9.8%)
 
 ### By Priority
 - [#A] High: 42.4% of time (good prioritization ✅)
@@ -101,16 +101,16 @@ The `dashboard.md` file is the **single source of truth** for a quick overview o
 ## 🔗 Knowledge Graph Insights
 
 ### Hub Pages (Most Connected)
-1. **[[Unitary]]** - 14 references (top hub)
-2. **[[Hearth Insights]]** - 12 references
-3. **[[Matt Stammers - SETT Lead]]** - 11 references (person)
-4. **[[Adrian Braine - mentor]]** - 10 references (person)
-5. **[[chris kipps - wessex data]]** - 8 references (person)
+1. **[[WorkJobThing]]** - 14 references (top hub)
+2. **[[Phoenix project]]** - 12 references
+3. **[[John smith]]** - 11 references (person)
+4. **[[mithrandir - mentor]]** - 10 references (person)
+5. **[[bilbo baggins]]** - 8 references (person)
 
 ### Key Contacts
 - 12 people pages with 5+ references
 - Top mentors: Adrian Braine, Gemma Snell
-- Top collaborators: Matt Stammers, chris kipps
+- Top collaborators: John smith, chris kipps
 
 👉 **Action**: See `reference-graph.md` for full network
 
@@ -120,11 +120,11 @@ The `dashboard.md` file is the **single source of truth** for a quick overview o
 
 High-impact pages referenced 5+ times but don't exist yet:
 
-1. **[[Matt Stammers - SETT: Theme Lead for Data & AI]]** - 11 refs
+1. **[[John smith]]** - 11 refs
    - Type: Person (contact)
    - Create: Add contact info, expertise, meeting notes
 
-2. **[[catalyst - marketing stream]]** - 7 refs
+2. **[[Banana project]]** - 7 refs
    - Type: Project/Program
    - Create: Document what this is, how it relates to work
 
@@ -149,12 +149,12 @@ High-impact pages referenced 5+ times but don't exist yet:
 ### Project Momentum
 - 🚀 [[Project Phoenix]]: Accelerating (18h this week vs 14h last week)
 - 📈 [[Mobile App]]: Steady progress (12h/week average)
-- 📉 [[Hearth Insights]]: Slowing (14h this month vs 30h last month)
+- 📉 [[Test Company]]: Slowing (14h this month vs 30h last month)
 
 ### Recommendations
 1. **Create missing people pages** - 12 contacts need pages
 2. **Tag untagged tasks** - 168 tasks (52%) have no priority marker
-3. **Review [[Hearth Insights]]** - Momentum down, needs attention?
+3. **Review [[Test Company]]** - Momentum down, needs attention?
 4. **Maintain current pace** - 32h/week sustainable
 
 ---

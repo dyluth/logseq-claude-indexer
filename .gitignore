@@ -28,3 +28,6 @@ testdata/user-provided/
 
 # Generated indexes during testing
 .claude/
+
+# files we want!
+!EXAMPLE-CLAUDE-STRUCTURE/.claude*

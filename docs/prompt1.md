@@ -80,7 +80,7 @@ logseq-index/
 │       ├── journals/
 │       │   └── 2025_04_06.md      # Sample journal
 │       └── pages/
-│           └── Hearth Insights.md  # Sample page
+│           └── Test Company.md  # Sample page
 ├── scripts/
 │   ├── install-hook.sh             # Install git post-commit hook
 │   └── uninstall-hook.sh           # Remove git hook
@@ -402,7 +402,7 @@ func ParseReferences(content string, filePath string) ([]PageReference, error) {
 
 func extractPageNameFromPath(filePath string) string {
     // journals/2025_04_06.md -> "2025_04_06"
-    // pages/Hearth Insights.md -> "Hearth Insights"
+    // pages/Test Company.md -> "Test Company"
     base := filepath.Base(filePath)
     return strings.TrimSuffix(base, ".md")
 }
@@ -532,7 +532,7 @@ Total Tasks: 47
 
 ## NOW Tasks (3)
 
-### [[Hearth Insights]] - setup actions
+### [[Test Company]] - setup actions
 - **File**: `journals/2025_04_06.md:1`
 - **Time Logged**: 260h 46m 44s
 - **Started**: 2025-04-06 12:30:42
@@ -553,7 +553,7 @@ Total Tasks: 47
 
 ## DONE Tasks (32)
 
-### [[Hearth Insights - Action Streams]] - Initial setup
+### [[Test Company - Action Streams]] - Initial setup
 - **File**: `journals/2025_04_06.md:5`
 - **Completed**: 2025-04-07
 - **Time Logged**: 1 second
@@ -562,7 +562,7 @@ Total Tasks: 47
 
 ## Tasks by Project
 
-### Hearth Insights (18 tasks)
+### Test Company (18 tasks)
 - 2 NOW
 - 8 LATER
 - 8 DONE
@@ -646,8 +646,8 @@ Total References: 58
 
 ## Hub Pages (Most Referenced)
 
-1. **[[Hearth Insights]]** - 12 inbound references
-   - File: `pages/Hearth Insights.md`
+1. **[[Test Company]]** - 12 inbound references
+   - File: `pages/Test Company.md`
 
 2. **[[FHIR]]** - 8 inbound references
    - File: `pages/FHIR.md`
@@ -659,12 +659,12 @@ Total References: 58
 
 ## Page Clusters
 
-### Hearth Insights Cluster
+### Test Company Cluster
 
-#### [[Hearth Insights]]
-- **File**: `pages/Hearth Insights.md`
+#### [[Test Company]]
+- **File**: `pages/Test Company.md`
 - **Outbound References** (4):
-  - [[Hearth Insights - principles]]
+  - [[Test Company - principles]]
   - [[HIPPA]]
   - [[FHIR]]
   - [[Healthcare research empowerment - company idea]]
@@ -675,14 +675,14 @@ Total References: 58
   - `pages/HI-pitch deck.md:15`
   - ... (8 more)
 
-#### [[Hearth Insights - Action Streams]]
-- **File**: `pages/Hearth Insights - Action Streams.md`
+#### [[Test Company - Action Streams]]
+- **File**: `pages/Test Company - Action Streams.md`
 - **Outbound References** (2):
-  - [[Hearth Insights]]
+  - [[Test Company]]
   - [[HI-prototype]]
 - **Inbound References** (3):
   - `journals/2025_04_06.md:5`
-  - `pages/Hearth Insights.md:20`
+  - `pages/Test Company.md:20`
 
 ---
 
@@ -696,7 +696,7 @@ Total References: 58
 
 Recent journal entries mentioning key topics:
 
-### [[Hearth Insights]]
+### [[Test Company]]
 - 2025-04-06: Initial setup and action items
 - 2025-04-07: Action streams defined
 - 2025-04-17: Architecture decisions

@@ -313,14 +313,14 @@ These pages are frequently referenced but don't exist yet. Creating them could i
 
 ## High Priority (5+ references)
 
-### [[Matt Stammers - SETT: Theme Lead for Data & AI]]
+### [[John smith]]
 - **Type**: Person
 - **References**: 11
 - **Referenced from**:
   - `journals/2025_04_15.md:12` - Meeting notes
   - `journals/2025_05_03.md:8` - Discussion about [[Data Strategy]]
   - `journals/2025_06_12.md:23` - Follow-up on [[SDE Access]]
-  - `pages/SETT Team.md:5` - Team structure
+  - `pages/JS Team.md:5` - Team structure
   - *... and 7 more*
 
 **Suggested Content**:
@@ -485,12 +485,12 @@ Total Time Logged: 342h 45m
    - Recent activity: 2025-11-03
    - Key focus: UI implementation (28h), Performance (18h)
 
-3. **[[Hearth Insights]]** - 52h 45m (15.4%)
+3. **[[Test Company]]** - 52h 45m (15.4%)
    - Tasks: 22 (4 NOW, 3 DOING, 15 DONE)
    - Recent activity: 2025-10-30
    - Key focus: Research (30h), Planning (15h)
 
-4. **[[Unitary]]** - 38h 20m (11.2%)
+4. **[[WorkJobThing]]** - 38h 20m (11.2%)
    - Tasks: 18 (2 NOW, 4 DOING, 12 DONE)
    - Recent activity: 2025-10-28
 
@@ -507,8 +507,8 @@ Total Time Logged: 342h 45m
 | Nov 4, 2025   | 42h 15m | [[Project Phoenix]] (28h) | Sprint 23 |
 | Oct 28, 2025  | 38h 30m | [[Project Phoenix]] (22h) | Authentication push |
 | Oct 21, 2025  | 35h 45m | [[Mobile App]] (20h) | Beta prep |
-| Oct 14, 2025  | 31h 20m | [[Hearth Insights]] (18h) | Planning phase |
-| Oct 7, 2025   | 28h 15m | [[Unitary]] (15h) | Research |
+| Oct 14, 2025  | 31h 20m | [[Test Company]] (18h) | Planning phase |
+| Oct 7, 2025   | 28h 15m | [[WorkJobThing]] (15h) | Research |
 | Sep 30, 2025  | 25h 40m | [[Mobile App]] (12h) | UI work |
 | Sep 23, 2025  | 22h 30m | [[Project Phoenix]] (14h) | Initial setup |
 | Sep 16, 2025  | 18h 45m | Various | Exploration |
@@ -557,7 +557,7 @@ Total Time Logged: 342h 45m
 ## Insights & Recommendations
 
 - ✅ Good time distribution across active projects
-- ⚠️  Consider prioritizing [[Unitary]] (only 11.2% of time, but 14 references)
+- ⚠️  Consider prioritizing [[WorkJobThing]] (only 11.2% of time, but 14 references)
 - 💡 High completion rate (57.9%) indicates good follow-through
 - 📊 Averaging 32h/week - consistent productivity
 ```
