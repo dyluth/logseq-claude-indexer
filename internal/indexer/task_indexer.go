@@ -15,6 +15,7 @@ type TaskIndex struct {
 	ByPriority  map[models.Priority][]models.Task // Grouped by priority level
 	ByProject   map[string][]models.Task           // Keyed by first page reference
 	Recent      []models.Task                      // Last 30 days
+	Upcoming    []models.Task                      // Non-DONE tasks with a scheduled date 3–14 days from now
 	Statistics  TaskStatistics                     // Summary statistics
 }
 
@@ -63,7 +64,10 @@ func BuildTaskIndex(tasks []models.Task) *TaskIndex {
 		index.ByPriority[priority] = []models.Task{}
 	}
 
-	thirtyDaysAgo := time.Now().AddDate(0, 0, -30)
+	now := time.Now()
+	thirtyDaysAgo := now.AddDate(0, 0, -30)
+	upcomingFrom := truncateToDay(now.AddDate(0, 0, 3))
+	upcomingTo := truncateToDay(now.AddDate(0, 0, 14))
 
 	for _, task := range tasks {
 		// Group by status
@@ -90,11 +94,24 @@ func BuildTaskIndex(tasks []models.Task) *TaskIndex {
 			index.Statistics.WithTimeTracking++
 			index.Statistics.TotalTimeLogged += task.TotalDuration()
 		}
+
+		// Add to upcoming if scheduled 3–14 days from now (non-DONE only)
+		if task.ScheduledDate != nil && task.Status != models.StatusDONE {
+			taskDay := truncateToDay(*task.ScheduledDate)
+			if !taskDay.Before(upcomingFrom) && !taskDay.After(upcomingTo) {
+				index.Upcoming = append(index.Upcoming, task)
+			}
+		}
 	}
 
 	// Sort recent tasks by most recent activity
 	sort.Slice(index.Recent, func(i, j int) bool {
 		return getMostRecentTime(index.Recent[i]).After(getMostRecentTime(index.Recent[j]))
+	})
+
+	// Sort upcoming tasks by scheduled date ascending
+	sort.Slice(index.Upcoming, func(i, j int) bool {
+		return index.Upcoming[i].ScheduledDate.Before(*index.Upcoming[j].ScheduledDate)
 	})
 
 	// Calculate statistics
@@ -104,6 +121,11 @@ func BuildTaskIndex(tasks []models.Task) *TaskIndex {
 	}
 
 	return index
+}
+
+// truncateToDay strips the time portion from t for date-only comparisons.
+func truncateToDay(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
 }
 
 // hasRecentActivity checks if a task has logbook entries within the time window

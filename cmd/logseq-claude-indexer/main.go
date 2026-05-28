@@ -234,6 +234,12 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	}
 	logger.Printf("✓ Created %s", filepath.Join(absOutputDir, "reference-graph.md"))
 
+	// Write upcoming tasks (scheduled 3–14 days out)
+	if err := writer.WriteUpcomingTasksIndex(taskIndex, absOutputDir); err != nil {
+		return fmt.Errorf("writing upcoming tasks: %w", err)
+	}
+	logger.Printf("✓ Created %s", filepath.Join(absOutputDir, "tasks-upcoming.md"))
+
 	// Write dashboard (aggregated overview)
 	if err := writer.WriteDashboard(taskIndex, graphIndex, timelineIndex, missingPagesIndex, timeTrackingIndex, absOutputDir); err != nil {
 		return fmt.Errorf("writing dashboard: %w", err)

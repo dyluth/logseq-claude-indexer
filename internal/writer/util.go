@@ -1,8 +1,11 @@
 package writer
 
 import (
+	"fmt"
 	"os"
 	"strings"
+
+	"github.com/dyluth/logseq-claude-indexer/pkg/models"
 )
 
 // writeIfChanged writes newContent to path only when the content has
@@ -18,6 +21,35 @@ func writeIfChanged(path, newContent string) error {
 		}
 	}
 	return os.WriteFile(path, []byte(newContent), 0644)
+}
+
+// buildUpcomingSet returns a set of "sourcefile:line" keys for upcoming tasks,
+// used to quickly exclude them from other indexes.
+func buildUpcomingSet(upcoming []models.Task) map[string]bool {
+	set := make(map[string]bool, len(upcoming))
+	for _, t := range upcoming {
+		set[taskKey(t)] = true
+	}
+	return set
+}
+
+// taskKey returns a unique string identifier for a task based on its location.
+func taskKey(t models.Task) string {
+	return fmt.Sprintf("%s:%d", t.SourceFile, t.LineNumber)
+}
+
+// filterUpcoming removes tasks that appear in the upcoming set.
+func filterUpcoming(tasks []models.Task, upcoming map[string]bool) []models.Task {
+	if len(upcoming) == 0 {
+		return tasks
+	}
+	filtered := tasks[:0:0] // zero-length slice reusing no backing array
+	for _, t := range tasks {
+		if !upcoming[taskKey(t)] {
+			filtered = append(filtered, t)
+		}
+	}
+	return filtered
 }
 
 // stripGeneratedLine removes every line whose non-whitespace content starts

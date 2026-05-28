@@ -12,7 +12,8 @@ import (
 	"github.com/dyluth/logseq-claude-indexer/pkg/models"
 )
 
-// WriteTaskIndex writes the task index to tasks-by-status.md with statistics
+// WriteTaskIndex writes the task index to tasks-by-status.md with statistics.
+// Tasks scheduled 3–14 days out are excluded from active sections; see tasks-upcoming.md.
 func WriteTaskIndex(index *indexer.TaskIndex, outputDir string) error {
 	// Ensure output directory exists
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -21,17 +22,21 @@ func WriteTaskIndex(index *indexer.TaskIndex, outputDir string) error {
 
 	filePath := filepath.Join(outputDir, "tasks-by-status.md")
 
+	upcoming := buildUpcomingSet(index.Upcoming)
+
 	var buf strings.Builder
 
-	// Write header
 	fmt.Fprintf(&buf, "# Tasks by Status\n\n")
 	fmt.Fprintf(&buf, "Generated: %s\n\n", index.GeneratedAt.Format(time.RFC3339))
 
-	// Write statistics section
 	writeStatistics(&buf, index)
 
-	// Write tasks by status in priority order
-	statuses := []struct {
+	if len(index.Upcoming) > 0 {
+		fmt.Fprintf(&buf, "> %d task(s) with scheduled dates (3–14 days out) excluded from active sections — see tasks-upcoming.md\n\n", len(index.Upcoming))
+	}
+
+	// Active statuses: filter out upcoming tasks
+	activeStatuses := []struct {
 		status models.TaskStatus
 		label  string
 	}{
@@ -39,18 +44,27 @@ func WriteTaskIndex(index *indexer.TaskIndex, outputDir string) error {
 		{models.StatusDOING, "DOING"},
 		{models.StatusTODO, "TODO"},
 		{models.StatusLATER, "LATER"},
-		{models.StatusDONE, "DONE"},
 	}
 
-	for _, s := range statuses {
-		tasks := index.ByStatus[s.status]
-		if len(tasks) > 0 {
-			fmt.Fprintf(&buf, "## %s (%d)\n\n", s.label, len(tasks))
-			for _, task := range tasks {
+	for _, s := range activeStatuses {
+		filtered := filterUpcoming(index.ByStatus[s.status], upcoming)
+		if len(filtered) > 0 {
+			fmt.Fprintf(&buf, "## %s (%d)\n\n", s.label, len(filtered))
+			for _, task := range filtered {
 				writeLeanTask(&buf, task)
 			}
 			fmt.Fprintf(&buf, "---\n\n")
 		}
+	}
+
+	// DONE tasks are never upcoming — no filtering needed
+	done := index.ByStatus[models.StatusDONE]
+	if len(done) > 0 {
+		fmt.Fprintf(&buf, "## DONE (%d)\n\n", len(done))
+		for _, task := range done {
+			writeLeanTask(&buf, task)
+		}
+		fmt.Fprintf(&buf, "---\n\n")
 	}
 
 	if err := writeIfChanged(filePath, buf.String()); err != nil {
@@ -59,23 +73,22 @@ func WriteTaskIndex(index *indexer.TaskIndex, outputDir string) error {
 	return nil
 }
 
-// WritePriorityIndex writes high priority tasks to tasks-by-priority.md
+// WritePriorityIndex writes high priority tasks to tasks-by-priority.md.
+// Tasks scheduled 3–14 days out are excluded from active sections; see tasks-upcoming.md.
 func WritePriorityIndex(index *indexer.TaskIndex, outputDir string) error {
-	// Ensure output directory exists
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
 		return fmt.Errorf("creating output directory: %w", err)
 	}
 
 	filePath := filepath.Join(outputDir, "tasks-by-priority.md")
 
+	upcoming := buildUpcomingSet(index.Upcoming)
+	highPriorityTasks := filterUpcoming(index.ByPriority[models.PriorityHigh], upcoming)
+
 	var buf strings.Builder
 
-	// Write header
 	fmt.Fprintf(&buf, "# High Priority Tasks [#A]\n\n")
 	fmt.Fprintf(&buf, "Generated: %s\n\n", index.GeneratedAt.Format(time.RFC3339))
-
-	// Get high priority tasks
-	highPriorityTasks := index.ByPriority[models.PriorityHigh]
 	fmt.Fprintf(&buf, "**Total High Priority**: %d tasks\n\n", len(highPriorityTasks))
 
 	if len(highPriorityTasks) == 0 {
@@ -83,9 +96,12 @@ func WritePriorityIndex(index *indexer.TaskIndex, outputDir string) error {
 		return writeIfChanged(filePath, buf.String())
 	}
 
+	if len(index.Upcoming) > 0 {
+		fmt.Fprintf(&buf, "> %d task(s) with scheduled dates (3–14 days out) excluded — see tasks-upcoming.md\n\n", len(index.Upcoming))
+	}
+
 	fmt.Fprintf(&buf, "---\n\n")
 
-	// Group by status
 	statuses := []struct {
 		status models.TaskStatus
 		label  string
@@ -98,14 +114,12 @@ func WritePriorityIndex(index *indexer.TaskIndex, outputDir string) error {
 	}
 
 	for _, s := range statuses {
-		// Filter high priority tasks by status
 		var statusTasks []models.Task
 		for _, task := range highPriorityTasks {
 			if task.Status == s.status {
 				statusTasks = append(statusTasks, task)
 			}
 		}
-
 		if len(statusTasks) > 0 {
 			fmt.Fprintf(&buf, "## %s (%d)\n\n", s.label, len(statusTasks))
 			for _, task := range statusTasks {

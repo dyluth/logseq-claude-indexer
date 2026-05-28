@@ -27,13 +27,14 @@ const (
 // Task represents a task extracted from Logseq markdown
 // Example: - NOW [#A] [[Project Name]] - Task description
 type Task struct {
-	Status      TaskStatus      // The task's status marker
-	Priority    Priority        // The task's priority level ([#A], [#B], [#C])
-	Description string          // Full task text (without status/priority markers)
-	PageRefs    []string        // [[Page Name]] references found in the task
-	SourceFile  string          // Relative path to file containing this task
-	LineNumber  int             // Line number where task appears (1-indexed)
-	Logbook     []LogbookEntry  // Time tracking entries (if :LOGBOOK: present)
+	Status        TaskStatus     // The task's status marker
+	Priority      Priority       // The task's priority level ([#A], [#B], [#C])
+	Description   string         // Full task text (without status/priority markers)
+	PageRefs      []string       // [[Page Name]] references found in the task
+	SourceFile    string         // Relative path to file containing this task
+	LineNumber    int            // Line number where task appears (1-indexed)
+	Logbook       []LogbookEntry // Time tracking entries (if :LOGBOOK: present)
+	ScheduledDate *time.Time     // Parsed date from [[Month DDth, YYYY]] refs, if present
 }
 
 // TotalDuration calculates the sum of all logbook entry durations

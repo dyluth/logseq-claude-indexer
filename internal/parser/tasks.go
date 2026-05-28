@@ -54,6 +54,14 @@ func ParseTasks(content string, filePath string) ([]models.Task, error) {
 			LineNumber:  i + 1, // 1-indexed
 		}
 
+		// Try to find a scheduled date from page references
+		for _, ref := range pageRefs {
+			if t, ok := parseLogseqDate(ref); ok {
+				task.ScheduledDate = &t
+				break
+			}
+		}
+
 		// Check if next line starts a logbook
 		if i+1 < len(lines) && strings.Contains(lines[i+1], ":LOGBOOK:") {
 			logbook, consumed := ParseLogbook(lines, i+1)
