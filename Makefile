@@ -1,19 +1,24 @@
 .PHONY: build test install install-user setup-git-hook test-datasets clean lint demo help
 
+VERSION    := 0.1.0
+COMMIT     := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+BUILD_TIME := $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
+LDFLAGS    := -ldflags "-X main.version=$(VERSION) -X main.commit=$(COMMIT) -X main.buildTime=$(BUILD_TIME)"
+
 # Build for current platform
 build:
 	@echo "Building logseq-claude-indexer..."
 	@mkdir -p bin
-	go build -o bin/logseq-claude-indexer ./cmd/logseq-claude-indexer
+	go build $(LDFLAGS) -o bin/logseq-claude-indexer ./cmd/logseq-claude-indexer
 
 # Build for multiple platforms
 build-all:
 	@echo "Building for multiple platforms..."
 	@mkdir -p bin
-	GOOS=darwin GOARCH=amd64 go build -o bin/logseq-claude-indexer-darwin-amd64 ./cmd/logseq-claude-indexer
-	GOOS=darwin GOARCH=arm64 go build -o bin/logseq-claude-indexer-darwin-arm64 ./cmd/logseq-claude-indexer
-	GOOS=linux GOARCH=amd64 go build -o bin/logseq-claude-indexer-linux-amd64 ./cmd/logseq-claude-indexer
-	GOOS=windows GOARCH=amd64 go build -o bin/logseq-claude-indexer-windows-amd64.exe ./cmd/logseq-claude-indexer
+	GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o bin/logseq-claude-indexer-darwin-amd64 ./cmd/logseq-claude-indexer
+	GOOS=darwin GOARCH=arm64 go build $(LDFLAGS) -o bin/logseq-claude-indexer-darwin-arm64 ./cmd/logseq-claude-indexer
+	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o bin/logseq-claude-indexer-linux-amd64 ./cmd/logseq-claude-indexer
+	GOOS=windows GOARCH=amd64 go build $(LDFLAGS) -o bin/logseq-claude-indexer-windows-amd64.exe ./cmd/logseq-claude-indexer
 
 # Run tests
 test:
@@ -27,11 +32,23 @@ test-coverage:
 	go tool cover -html=coverage.out -o coverage.html
 	@echo "Coverage report generated: coverage.html"
 
-# Install to GOPATH/bin
-install:
+# Install - updates wherever the binary currently lives, or installs fresh to ~/.local/bin
+install: build
 	@echo "Installing logseq-claude-indexer..."
-	go install ./cmd/logseq-claude-indexer
-	@echo "✓ Installed to GOPATH/bin"
+	@EXISTING=$$(command -v logseq-claude-indexer 2>/dev/null); \
+	if [ -n "$$EXISTING" ]; then \
+		cp bin/logseq-claude-indexer "$$EXISTING" && \
+		chmod +x "$$EXISTING" && \
+		echo "✓ Updated $$EXISTING"; \
+	elif echo "$$PATH" | tr ':' '\n' | grep -q "$(HOME)/.local/bin"; then \
+		mkdir -p $(HOME)/.local/bin && \
+		cp bin/logseq-claude-indexer $(HOME)/.local/bin/logseq-claude-indexer && \
+		chmod +x $(HOME)/.local/bin/logseq-claude-indexer && \
+		echo "✓ Installed to ~/.local/bin/logseq-claude-indexer"; \
+	else \
+		go install $(LDFLAGS) ./cmd/logseq-claude-indexer && \
+		echo "✓ Installed to GOPATH/bin ($$(go env GOPATH)/bin)"; \
+	fi
 	@echo ""
 	@echo "To set up git hooks in your Logseq repo:"
 	@echo "  cd /path/to/your/logseq/repo"

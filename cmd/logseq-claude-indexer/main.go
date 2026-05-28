@@ -22,7 +22,11 @@ var (
 	quiet     bool
 	verbose   bool
 	dryRun    bool
-	version   = "0.1.0"
+
+	// Set at build time via -ldflags.
+	version   = "dev"
+	commit    = "unknown"
+	buildTime = "unknown"
 )
 
 func main() {
@@ -51,6 +55,8 @@ var versionCmd = &cobra.Command{
 	Short: "Show version information",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("logseq-claude-indexer version %s\n", version)
+		fmt.Printf("  commit:     %s\n", commit)
+		fmt.Printf("  built:      %s\n", buildTime)
 	},
 }
 
