@@ -31,11 +31,16 @@ func WriteTaskIndex(index *indexer.TaskIndex, outputDir string) error {
 
 	writeStatistics(&buf, index)
 
+	// Cross-reference notes
+	doneCount := len(index.ByStatus[models.StatusDONE])
+	if doneCount > 0 {
+		fmt.Fprintf(&buf, "> %d completed task(s) not shown — see tasks-done.md\n\n", doneCount)
+	}
 	if len(index.Upcoming) > 0 {
-		fmt.Fprintf(&buf, "> %d task(s) with scheduled dates (3–14 days out) excluded from active sections — see tasks-upcoming.md\n\n", len(index.Upcoming))
+		fmt.Fprintf(&buf, "> %d task(s) with scheduled dates (3–14 days out) excluded — see tasks-upcoming.md\n\n", len(index.Upcoming))
 	}
 
-	// Active statuses: filter out upcoming tasks
+	// Active statuses only: filter out upcoming tasks, never show DONE
 	activeStatuses := []struct {
 		status models.TaskStatus
 		label  string
@@ -57,16 +62,6 @@ func WriteTaskIndex(index *indexer.TaskIndex, outputDir string) error {
 		}
 	}
 
-	// DONE tasks are never upcoming — no filtering needed
-	done := index.ByStatus[models.StatusDONE]
-	if len(done) > 0 {
-		fmt.Fprintf(&buf, "## DONE (%d)\n\n", len(done))
-		for _, task := range done {
-			writeLeanTask(&buf, task)
-		}
-		fmt.Fprintf(&buf, "---\n\n")
-	}
-
 	if err := writeIfChanged(filePath, buf.String()); err != nil {
 		return fmt.Errorf("writing file: %w", err)
 	}
@@ -83,26 +78,42 @@ func WritePriorityIndex(index *indexer.TaskIndex, outputDir string) error {
 	filePath := filepath.Join(outputDir, "tasks-by-priority.md")
 
 	upcoming := buildUpcomingSet(index.Upcoming)
-	highPriorityTasks := filterUpcoming(index.ByPriority[models.PriorityHigh], upcoming)
+	// Only active (non-DONE) high priority tasks
+	var activePriority []models.Task
+	for _, t := range filterUpcoming(index.ByPriority[models.PriorityHigh], upcoming) {
+		if t.Status != models.StatusDONE {
+			activePriority = append(activePriority, t)
+		}
+	}
 
 	var buf strings.Builder
 
 	fmt.Fprintf(&buf, "# High Priority Tasks [#A]\n\n")
 	fmt.Fprintf(&buf, "Generated: %s\n\n", index.GeneratedAt.Format(time.RFC3339))
-	fmt.Fprintf(&buf, "**Total High Priority**: %d tasks\n\n", len(highPriorityTasks))
+	fmt.Fprintf(&buf, "**Total Active High Priority**: %d tasks\n\n", len(activePriority))
 
-	if len(highPriorityTasks) == 0 {
-		fmt.Fprintf(&buf, "*No high priority tasks found.*\n")
-		return writeIfChanged(filePath, buf.String())
+	// Cross-reference notes
+	doneHighCount := 0
+	for _, t := range index.ByPriority[models.PriorityHigh] {
+		if t.Status == models.StatusDONE {
+			doneHighCount++
+		}
 	}
-
+	if doneHighCount > 0 {
+		fmt.Fprintf(&buf, "> %d completed high priority task(s) not shown — see tasks-done.md\n\n", doneHighCount)
+	}
 	if len(index.Upcoming) > 0 {
 		fmt.Fprintf(&buf, "> %d task(s) with scheduled dates (3–14 days out) excluded — see tasks-upcoming.md\n\n", len(index.Upcoming))
 	}
 
+	if len(activePriority) == 0 {
+		fmt.Fprintf(&buf, "*No active high priority tasks found.*\n")
+		return writeIfChanged(filePath, buf.String())
+	}
+
 	fmt.Fprintf(&buf, "---\n\n")
 
-	statuses := []struct {
+	activeStatuses := []struct {
 		status models.TaskStatus
 		label  string
 	}{
@@ -110,12 +121,11 @@ func WritePriorityIndex(index *indexer.TaskIndex, outputDir string) error {
 		{models.StatusDOING, "DOING"},
 		{models.StatusTODO, "TODO"},
 		{models.StatusLATER, "LATER"},
-		{models.StatusDONE, "DONE"},
 	}
 
-	for _, s := range statuses {
+	for _, s := range activeStatuses {
 		var statusTasks []models.Task
-		for _, task := range highPriorityTasks {
+		for _, task := range activePriority {
 			if task.Status == s.status {
 				statusTasks = append(statusTasks, task)
 			}

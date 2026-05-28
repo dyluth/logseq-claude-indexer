@@ -204,6 +204,20 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	}
 	logger.Printf("✓ Created %s", filepath.Join(absOutputDir, "tasks-by-priority.md"))
 
+	// Write completed tasks
+	if err := writer.WriteTasksDone(taskIndex, absOutputDir); err != nil {
+		return fmt.Errorf("writing completed tasks: %w", err)
+	}
+	logger.Printf("✓ Created %s", filepath.Join(absOutputDir, "tasks-done.md"))
+
+	// Remove legacy task-index.md if present
+	legacyPath := filepath.Join(absOutputDir, "task-index.md")
+	if err := os.Remove(legacyPath); err != nil && !os.IsNotExist(err) {
+		logger.Printf("Warning: could not remove legacy task-index.md: %v", err)
+	} else if err == nil {
+		logger.Printf("✓ Removed legacy %s", legacyPath)
+	}
+
 	// Write timeline recent
 	if err := writer.WriteTimelineRecent(timelineIndex, absOutputDir); err != nil {
 		return fmt.Errorf("writing recent timeline: %w", err)

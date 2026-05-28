@@ -308,7 +308,7 @@ func TestWritePriorityIndex(t *testing.T) {
 	// Check for expected sections
 	expectedStrings := []string{
 		"# High Priority Tasks [#A]",
-		"Total High Priority",
+		"Total Active High Priority",
 		"Urgent task with high priority",
 		"Another high priority task",
 		"journals/2025-11-06.md:10",
@@ -364,8 +364,8 @@ func TestWritePriorityIndex_NoHighPriority(t *testing.T) {
 
 	contentStr := string(content)
 
-	// Should indicate no high priority tasks
-	if !strings.Contains(contentStr, "No high priority tasks found") {
-		t.Error("Expected message about no high priority tasks")
+	// Should indicate no active high priority tasks
+	if !strings.Contains(contentStr, "No active high priority tasks found") {
+		t.Error("Expected message about no active high priority tasks")
 	}
 }

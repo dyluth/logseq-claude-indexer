@@ -16,6 +16,7 @@ type TaskIndex struct {
 	ByProject   map[string][]models.Task           // Keyed by first page reference
 	Recent      []models.Task                      // Last 30 days
 	Upcoming    []models.Task                      // Non-DONE tasks with a scheduled date 3–14 days from now
+	Done        []models.Task                      // All DONE tasks, sorted by most recent activity desc
 	Statistics  TaskStatistics                     // Summary statistics
 }
 
@@ -102,16 +103,39 @@ func BuildTaskIndex(tasks []models.Task) *TaskIndex {
 				index.Upcoming = append(index.Upcoming, task)
 			}
 		}
+
+		if task.Status == models.StatusDONE {
+			index.Done = append(index.Done, task)
+		}
 	}
 
 	// Sort recent tasks by most recent activity
 	sort.Slice(index.Recent, func(i, j int) bool {
-		return getMostRecentTime(index.Recent[i]).After(getMostRecentTime(index.Recent[j]))
+		return GetMostRecentTime(index.Recent[i]).After(GetMostRecentTime(index.Recent[j]))
 	})
 
 	// Sort upcoming tasks by scheduled date ascending
 	sort.Slice(index.Upcoming, func(i, j int) bool {
 		return index.Upcoming[i].ScheduledDate.Before(*index.Upcoming[j].ScheduledDate)
+	})
+
+	// Sort DONE tasks: most recent logbook activity first; no-logbook tasks sorted by source file
+	sort.SliceStable(index.Done, func(i, j int) bool {
+		ti := GetMostRecentTime(index.Done[i])
+		tj := GetMostRecentTime(index.Done[j])
+		if ti.IsZero() && tj.IsZero() {
+			if index.Done[i].SourceFile != index.Done[j].SourceFile {
+				return index.Done[i].SourceFile < index.Done[j].SourceFile
+			}
+			return index.Done[i].LineNumber < index.Done[j].LineNumber
+		}
+		if ti.IsZero() {
+			return false // no logbook goes after tasks with logbook
+		}
+		if tj.IsZero() {
+			return true
+		}
+		return ti.After(tj)
 	})
 
 	// Calculate statistics
@@ -138,8 +162,8 @@ func hasRecentActivity(task models.Task, since time.Time) bool {
 	return false
 }
 
-// getMostRecentTime returns the most recent timestamp from a task's logbook
-func getMostRecentTime(task models.Task) time.Time {
+// GetMostRecentTime returns the most recent timestamp from a task's logbook.
+func GetMostRecentTime(task models.Task) time.Time {
 	if len(task.Logbook) == 0 {
 		return time.Time{} // Zero time for tasks without logbook
 	}
