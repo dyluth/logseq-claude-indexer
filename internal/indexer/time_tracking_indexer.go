@@ -9,31 +9,32 @@ import (
 
 // ProjectTime represents time logged for a specific project
 type ProjectTime struct {
-	Project      string
-	TimeLogged   time.Duration
-	TaskCount    int
+	Project        string
+	TimeLogged     time.Duration
+	TaskCount      int
 	AvgTimePerTask time.Duration
 }
 
 // WeeklyTime represents time logged in a specific week
 type WeeklyTime struct {
-	WeekStart    time.Time // Monday of the week
-	TimeLogged   time.Duration
-	TaskCount    int
+	WeekStart  time.Time // Monday of the week
+	TimeLogged time.Duration
+	TaskCount  int
 }
 
 // TimeStatistics provides aggregate statistics
 type TimeStatistics struct {
-	TotalTasks         int
-	TasksWithTracking  int
+	TotalTasks           int
+	TasksWithTracking    int
 	TasksWithoutTracking int
-	AdoptionRate       float64 // Percentage of tasks with time tracking
-	AvgTimePerTask     time.Duration
-	MostProductiveWeek WeeklyTime
+	AdoptionRate         float64 // Percentage of tasks with time tracking
+	AvgTimePerTask       time.Duration
+	MostProductiveWeek   WeeklyTime
 }
 
 // TimeTrackingIndex aggregates all time tracking data
 type TimeTrackingIndex struct {
+	GeneratedAt     time.Time
 	TotalTimeLogged time.Duration
 	ByProject       map[string]time.Duration
 	ByWeek          map[string]time.Duration // Key: "2025-11-04" (Monday of week)
@@ -45,12 +46,13 @@ type TimeTrackingIndex struct {
 }
 
 // BuildTimeTrackingIndex creates a time tracking index from all tasks
-func BuildTimeTrackingIndex(tasks []models.Task) *TimeTrackingIndex {
+func BuildTimeTrackingIndex(tasks []models.Task, now time.Time) *TimeTrackingIndex {
 	index := &TimeTrackingIndex{
-		ByProject:  make(map[string]time.Duration),
-		ByWeek:     make(map[string]time.Duration),
-		ByPriority: make(map[models.Priority]time.Duration),
-		ByStatus:   make(map[models.TaskStatus]time.Duration),
+		GeneratedAt: now,
+		ByProject:   make(map[string]time.Duration),
+		ByWeek:      make(map[string]time.Duration),
+		ByPriority:  make(map[models.Priority]time.Duration),
+		ByStatus:    make(map[models.TaskStatus]time.Duration),
 	}
 
 	projectTaskCounts := make(map[string]int)

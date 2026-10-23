@@ -24,9 +24,9 @@ type GraphNode struct {
 }
 
 // BuildReferenceGraph creates a ReferenceGraph from page references and files
-func BuildReferenceGraph(refs []models.PageReference, files []models.File) *ReferenceGraph {
+func BuildReferenceGraph(refs []models.PageReference, files []models.File, now time.Time) *ReferenceGraph {
 	graph := &ReferenceGraph{
-		GeneratedAt: time.Now(),
+		GeneratedAt: now,
 		Nodes:       make(map[string]*GraphNode),
 	}
 

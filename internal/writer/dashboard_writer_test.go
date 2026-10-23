@@ -144,8 +144,10 @@ func TestWriteDashboard_WithAllData(t *testing.T) {
 					{Status: models.StatusDONE},
 				},
 				TimeLogged: 5 * time.Hour,
+				// Shaped like indexer.generateKeyActivity output: counts, then highlights.
 				KeyActivity: []string{
-					"- **[NOW]** Fix critical bug",
+					"2 NOW tasks",
+					"1 DONE task",
 					"🔥 Deploy to production",
 				},
 			},
@@ -224,8 +226,14 @@ func TestWriteDashboard_WithAllData(t *testing.T) {
 	if !strings.Contains(output, "Recent Activity") {
 		t.Error("Expected Recent Activity section")
 	}
-	if !strings.Contains(output, "2 NOW") {
-		t.Error("Expected NOW task count")
+	if !strings.Contains(output, "- 2 NOW tasks\n") {
+		t.Error("Expected NOW task count as a bullet")
+	}
+	if n := strings.Count(output, "2 NOW tasks"); n != 1 {
+		t.Errorf("Expected NOW task count once per day, found %d", n)
+	}
+	if !strings.Contains(output, "- 🔥 Deploy to production\n") {
+		t.Error("Expected key activity highlight as a bullet")
 	}
 	if !strings.Contains(output, "5h") {
 		t.Error("Expected time logged")

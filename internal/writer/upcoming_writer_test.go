@@ -35,7 +35,7 @@ func TestWriteUpcomingTasksIndex(t *testing.T) {
 		},
 	}
 
-	idx := indexer.BuildTaskIndex(tasks)
+	idx := indexer.BuildTaskIndex(tasks, time.Now())
 
 	tmpDir := t.TempDir()
 	if err := WriteUpcomingTasksIndex(idx, tmpDir); err != nil {
@@ -67,7 +67,7 @@ func TestWriteUpcomingTasksIndex(t *testing.T) {
 }
 
 func TestWriteUpcomingTasksIndex_Empty(t *testing.T) {
-	idx := indexer.BuildTaskIndex([]models.Task{})
+	idx := indexer.BuildTaskIndex([]models.Task{}, time.Now())
 
 	tmpDir := t.TempDir()
 	if err := WriteUpcomingTasksIndex(idx, tmpDir); err != nil {

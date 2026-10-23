@@ -1,4 +1,4 @@
-.PHONY: build test install install-user setup-git-hook test-datasets clean lint demo help
+.PHONY: build test update-golden install install-user setup-git-hook test-datasets clean lint demo help
 
 VERSION    := 0.1.0
 COMMIT     := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
@@ -24,6 +24,11 @@ build-all:
 test:
 	@echo "Running tests..."
 	go test -v -race -cover ./...
+
+# Regenerate golden index output after an intentional change; review the diff before committing
+update-golden:
+	go test ./cmd/logseq-claude-indexer -run TestGolden -update
+	@git --no-pager diff --stat -- testdata/golden
 
 # Run tests with coverage report
 test-coverage:
@@ -176,6 +181,7 @@ help:
 	@echo "Testing:"
 	@echo "  test               - Run unit tests"
 	@echo "  test-coverage      - Run tests with coverage report"
+	@echo "  update-golden      - Regenerate testdata/golden after an intended output change"
 	@echo "  test-datasets      - Test on all datasets (fixtures, synthetic, user-provided)"
 	@echo "  demo               - Run on test fixtures"
 	@echo ""

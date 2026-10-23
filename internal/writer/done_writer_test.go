@@ -54,7 +54,7 @@ func TestWriteTasksDone(t *testing.T) {
 		},
 	}
 
-	idx := indexer.BuildTaskIndex(tasks)
+	idx := indexer.BuildTaskIndex(tasks, time.Now())
 	tmpDir := t.TempDir()
 
 	if err := WriteTasksDone(idx, tmpDir); err != nil {
@@ -96,7 +96,7 @@ func TestWriteTasksDone(t *testing.T) {
 }
 
 func TestWriteTasksDone_Empty(t *testing.T) {
-	idx := indexer.BuildTaskIndex([]models.Task{})
+	idx := indexer.BuildTaskIndex([]models.Task{}, time.Now())
 	tmpDir := t.TempDir()
 
 	if err := WriteTasksDone(idx, tmpDir); err != nil {
@@ -128,7 +128,7 @@ func TestWriteTasksDone_NoneRecent(t *testing.T) {
 		},
 	}
 
-	idx := indexer.BuildTaskIndex(tasks)
+	idx := indexer.BuildTaskIndex(tasks, time.Now())
 	tmpDir := t.TempDir()
 
 	if err := WriteTasksDone(idx, tmpDir); err != nil {

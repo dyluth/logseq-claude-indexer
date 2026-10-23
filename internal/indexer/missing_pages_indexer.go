@@ -3,6 +3,7 @@ package indexer
 import (
 	"sort"
 	"strings"
+	"time"
 )
 
 // MissingPage represents a page that is referenced but doesn't exist
@@ -15,6 +16,7 @@ type MissingPage struct {
 
 // MissingPagesIndex contains pages that should be created
 type MissingPagesIndex struct {
+	GeneratedAt  time.Time
 	MissingPages []MissingPage
 	Threshold    int // Minimum references to be included (5)
 }
@@ -22,7 +24,8 @@ type MissingPagesIndex struct {
 // BuildMissingPagesIndex identifies high-value pages to create from the reference graph
 func BuildMissingPagesIndex(graph *ReferenceGraph, threshold int) *MissingPagesIndex {
 	index := &MissingPagesIndex{
-		Threshold: threshold,
+		GeneratedAt: graph.GeneratedAt,
+		Threshold:   threshold,
 	}
 
 	// Iterate through all referenced pages

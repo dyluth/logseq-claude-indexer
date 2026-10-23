@@ -32,7 +32,7 @@ func TestBuildTaskIndex_Upcoming(t *testing.T) {
 		{Status: models.StatusTODO, Description: "no date", SourceFile: "t.md", LineNumber: 7},
 	}
 
-	index := BuildTaskIndex(tasks)
+	index := BuildTaskIndex(tasks, time.Now())
 
 	if len(index.Upcoming) != 3 {
 		t.Errorf("expected 3 upcoming tasks, got %d", len(index.Upcoming))

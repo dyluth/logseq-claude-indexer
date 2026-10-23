@@ -83,6 +83,27 @@ Defer to v2.0. MVP should prioritize correctness and simplicity. Full reindex is
 
 ---
 
+## Validated Write Path
+
+### Motivation
+The indexes give Claude a reliable, deterministic way to *read* the knowledge base,
+but writing back (marking a task DONE, rescheduling, adding a block) still means
+hand-editing raw Logseq markdown, where a wrong indent or marker fails silently.
+
+### Approach
+- The human keeps editing freehand; the agent writes only through a checked command,
+  e.g. `logseq-claude-indexer task done <file>:<line>` or `task schedule <file>:<line> <date>`
+- Each command parses the target block, applies one structured change and re-parses
+  the file, refusing the write if anything other than the intended block changed
+- Round-trip tests: parse → serialise must reproduce every fixture byte for byte
+- Regenerate the affected indexes after a successful write
+
+### Trade-offs
+- Logseq's format is loosely specified, so the round-trip guarantee is only as good as
+  the fixtures; start with task status and SCHEDULED only
+
+---
+
 ## Far Future - Web UI
 
 ### Browser-Based Viewer

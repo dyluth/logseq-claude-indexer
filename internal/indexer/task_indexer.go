@@ -13,27 +13,27 @@ type TaskIndex struct {
 	TotalTasks  int
 	ByStatus    map[models.TaskStatus][]models.Task
 	ByPriority  map[models.Priority][]models.Task // Grouped by priority level
-	ByProject   map[string][]models.Task           // Keyed by first page reference
-	Recent      []models.Task                      // Last 30 days
-	Upcoming    []models.Task                      // Non-DONE tasks with a scheduled date 3–14 days from now
-	Done        []models.Task                      // All DONE tasks, sorted by most recent activity desc
-	Statistics  TaskStatistics                     // Summary statistics
+	ByProject   map[string][]models.Task          // Keyed by first page reference
+	Recent      []models.Task                     // Last 30 days
+	Upcoming    []models.Task                     // Non-DONE tasks with a scheduled date 3–14 days from now
+	Done        []models.Task                     // All DONE tasks, sorted by most recent activity desc
+	Statistics  TaskStatistics                    // Summary statistics
 }
 
 // TaskStatistics provides summary statistics for tasks
 type TaskStatistics struct {
-	CompletionRate    float64                        // Percentage of DONE tasks
-	PriorityBreakdown map[models.Priority]int        // Count by priority
-	StatusBreakdown   map[models.TaskStatus]int      // Count by status
-	WithTimeTracking  int                            // Count of tasks with LOGBOOK
-	TotalTimeLogged   time.Duration                  // Sum of all LOGBOOK time
-	TrackingAdoption  float64                        // Percentage with time tracking
+	CompletionRate    float64                   // Percentage of DONE tasks
+	PriorityBreakdown map[models.Priority]int   // Count by priority
+	StatusBreakdown   map[models.TaskStatus]int // Count by status
+	WithTimeTracking  int                       // Count of tasks with LOGBOOK
+	TotalTimeLogged   time.Duration             // Sum of all LOGBOOK time
+	TrackingAdoption  float64                   // Percentage with time tracking
 }
 
 // BuildTaskIndex creates a TaskIndex from a list of tasks
-func BuildTaskIndex(tasks []models.Task) *TaskIndex {
+func BuildTaskIndex(tasks []models.Task, now time.Time) *TaskIndex {
 	index := &TaskIndex{
-		GeneratedAt: time.Now(),
+		GeneratedAt: now,
 		TotalTasks:  len(tasks),
 		ByStatus:    make(map[models.TaskStatus][]models.Task),
 		ByPriority:  make(map[models.Priority][]models.Task),
@@ -65,7 +65,6 @@ func BuildTaskIndex(tasks []models.Task) *TaskIndex {
 		index.ByPriority[priority] = []models.Task{}
 	}
 
-	now := time.Now()
 	thirtyDaysAgo := now.AddDate(0, 0, -30)
 	upcomingFrom := truncateToDay(now.AddDate(0, 0, 3))
 	upcomingTo := truncateToDay(now.AddDate(0, 0, 14))

@@ -24,7 +24,7 @@ func WriteMissingPages(index *indexer.MissingPagesIndex, outputDir string) error
 
 	// Write header
 	fmt.Fprintf(&buf, "# Missing Pages to Create\n\n")
-	fmt.Fprintf(&buf, "Generated: %s\n\n", time.Now().Format(time.RFC3339))
+	fmt.Fprintf(&buf, "Generated: %s\n\n", index.GeneratedAt.Format(time.RFC3339))
 
 	if len(index.MissingPages) == 0 {
 		fmt.Fprintf(&buf, "*No missing pages with %d+ references found.*\n", index.Threshold)

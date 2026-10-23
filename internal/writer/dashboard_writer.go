@@ -31,7 +31,7 @@ func WriteDashboard(
 
 	// Header
 	fmt.Fprintf(&buf, "# Knowledge Dashboard\n\n")
-	fmt.Fprintf(&buf, "**Generated**: %s\n\n", time.Now().UTC().Format(time.RFC3339))
+	fmt.Fprintf(&buf, "**Generated**: %s\n\n", taskIndex.GeneratedAt.UTC().Format(time.RFC3339))
 
 	// Quick Stats
 	fmt.Fprintf(&buf, "## 📊 Quick Stats\n\n")
@@ -106,30 +106,14 @@ func WriteDashboard(
 			day := timelineIndex.Entries[i]
 			fmt.Fprintf(&buf, "### %s\n", day.Date.Format("Monday, Jan 2"))
 
-			statusCounts := make(map[string]int)
-			for _, task := range day.TasksCreated {
-				statusCounts[string(task.Status)]++
-			}
-
-			// Show task counts by status
-			if len(statusCounts) > 0 {
-				for _, status := range []string{"NOW", "TODO", "DONE", "DOING", "LATER"} {
-					if count := statusCounts[status]; count > 0 {
-						fmt.Fprintf(&buf, "- %d %s task%s\n", count, status, pluralize(count))
-					}
-				}
+			// KeyActivity already holds the per-status counts and any
+			// high-priority highlights, so render it rather than recounting.
+			for _, activity := range day.KeyActivity {
+				fmt.Fprintf(&buf, "- %s\n", activity)
 			}
 
 			if day.TimeLogged > 0 {
 				fmt.Fprintf(&buf, "- ⏱ %s logged\n", formatDuration(day.TimeLogged))
-			}
-
-			// Show key activity bullets
-			if len(day.KeyActivity) > 0 {
-				fmt.Fprintf(&buf, "\n")
-				for _, activity := range day.KeyActivity {
-					fmt.Fprintf(&buf, "%s\n", activity)
-				}
 			}
 			fmt.Fprintf(&buf, "\n")
 		}
