@@ -323,7 +323,9 @@ logseq-claude-indexer/
 ├── pkg/
 │   └── models/                    # Shared data structures
 ├── testdata/
-│   └── fixtures/                  # Sample Logseq files
+│   ├── fixtures/                  # Sample Logseq files
+│   ├── synthetic/                 # Fictional graph used by the golden test
+│   └── golden/                    # Expected index output for synthetic/
 └── Makefile
 ```
 
@@ -342,6 +344,25 @@ go test ./internal/parser/
 # Verbose
 go test -v ./...
 ```
+
+### Deterministic Output
+
+The indexes run from a post-commit hook and are read by an agent, so the same
+notes must always produce byte-identical files. Otherwise every run churns git
+and changes what Claude sees. Rules for code that feeds the output:
+
+- **No hidden clock**: `time.Now()` is read once in `main` and passed down. Builders
+  and writers use the index's `GeneratedAt`, never the wall clock.
+- **No unordered iteration**: never emit straight from a map range; sort, with a
+  tiebreaker for equal keys.
+- **Only write on real change**: `writeIfChanged` ignores the `Generated:` line.
+
+Two tests in `cmd/logseq-claude-indexer` enforce this end to end:
+
+- `TestGenerateDeterministic` runs the full pipeline twice and requires identical output.
+- `TestGolden` compares every index generated from `testdata/synthetic` at a fixed
+  clock against `testdata/golden/`. If you change the output on purpose, run
+  `make update-golden` and review the diff of the generated files, not just the code.
 
 ## Performance
 

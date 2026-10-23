@@ -39,7 +39,7 @@ func TestBuildTaskIndex(t *testing.T) {
 		},
 	}
 
-	index := BuildTaskIndex(tasks)
+	index := BuildTaskIndex(tasks, time.Now())
 
 	// Check total
 	if index.TotalTasks != 4 {
@@ -112,7 +112,7 @@ func TestBuildTaskIndex_RecentTasks(t *testing.T) {
 		},
 	}
 
-	index := BuildTaskIndex(tasks)
+	index := BuildTaskIndex(tasks, time.Now())
 
 	// Only the recent task should appear in Recent
 	if len(index.Recent) != 1 {
@@ -133,7 +133,7 @@ func TestGetProjectSummaries(t *testing.T) {
 		{Status: models.StatusTODO, PageRefs: []string{"Project B"}},
 	}
 
-	index := BuildTaskIndex(tasks)
+	index := BuildTaskIndex(tasks, time.Now())
 	summaries := index.GetProjectSummaries()
 
 	if len(summaries) != 2 {
@@ -175,7 +175,7 @@ func TestBuildReferenceGraph(t *testing.T) {
 		{SourcePage: "Page B", TargetPage: "Page C"}, // Duplicate
 	}
 
-	graph := BuildReferenceGraph(refs, files)
+	graph := BuildReferenceGraph(refs, files, time.Now())
 
 	// Check nodes exist
 	if len(graph.Nodes) != 3 {
@@ -216,7 +216,7 @@ func TestBuildReferenceGraph_NonExistentTargets(t *testing.T) {
 		{SourcePage: "Page A", TargetPage: "Non Existent Page"},
 	}
 
-	graph := BuildReferenceGraph(refs, files)
+	graph := BuildReferenceGraph(refs, files, time.Now())
 
 	// Should create node for non-existent page
 	if _, exists := graph.Nodes["Non Existent Page"]; !exists {
@@ -245,7 +245,7 @@ func TestGetOrphanPages(t *testing.T) {
 		{SourcePage: "Connected", TargetPage: "Another"},
 	}
 
-	graph := BuildReferenceGraph(refs, files)
+	graph := BuildReferenceGraph(refs, files, time.Now())
 	orphans := graph.GetOrphanPages()
 
 	// Orphan page should appear

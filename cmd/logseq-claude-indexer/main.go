@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -93,6 +94,19 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("repository path does not exist: %s", absRepoPath)
 	}
 
+	// Make output path absolute (relative to repo path)
+	absOutputDir := outputDir
+	if !filepath.IsAbs(outputDir) {
+		absOutputDir = filepath.Join(absRepoPath, outputDir)
+	}
+
+	// Read the clock exactly once, here at the edge. Everything downstream
+	// takes this value, so a run is a pure function of (notes, now).
+	return generate(absRepoPath, absOutputDir, time.Now(), logger)
+}
+
+// generate scans, indexes and writes all index files for absRepoPath as of now.
+func generate(absRepoPath, absOutputDir string, now time.Time, logger *log.Logger) error {
 	// 1. Scan for files
 	if verbose {
 		logger.Println("Step 1: Scanning for markdown files...")
@@ -163,11 +177,11 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		logger.Println("Step 3: Building indexes...")
 	}
 
-	taskIndex := indexer.BuildTaskIndex(allTasks)
-	graphIndex := indexer.BuildReferenceGraph(allRefs, files)
-	timelineIndex := indexer.BuildTimelineIndex(allTasks, files)
+	taskIndex := indexer.BuildTaskIndex(allTasks, now)
+	graphIndex := indexer.BuildReferenceGraph(allRefs, files, now)
+	timelineIndex := indexer.BuildTimelineIndex(allTasks, files, now)
 	missingPagesIndex := indexer.BuildMissingPagesIndex(graphIndex, 5)
-	timeTrackingIndex := indexer.BuildTimeTrackingIndex(allTasks)
+	timeTrackingIndex := indexer.BuildTimeTrackingIndex(allTasks, now)
 
 	if dryRun {
 		logger.Println("\n=== DRY RUN MODE ===")
@@ -184,12 +198,6 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	// 4. Write output files
 	if verbose {
 		logger.Println("Step 4: Writing index files...")
-	}
-
-	// Make output path absolute (relative to repo path)
-	absOutputDir := outputDir
-	if !filepath.IsAbs(outputDir) {
-		absOutputDir = filepath.Join(absRepoPath, outputDir)
 	}
 
 	// Write task index by status

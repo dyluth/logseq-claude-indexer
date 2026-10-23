@@ -181,14 +181,14 @@ func TestTimelineRecentDeterministic(t *testing.T) {
 	dir := t.TempDir()
 
 	// First write (file does not exist yet → always writes).
-	idx1 := indexer.BuildTimelineIndex(tasks, files)
+	idx1 := indexer.BuildTimelineIndex(tasks, files, time.Now())
 	if err := WriteTimelineRecent(idx1, dir); err != nil {
 		t.Fatalf("first write: %v", err)
 	}
 	content1, _ := os.ReadFile(filepath.Join(dir, "timeline-recent.md"))
 
 	// Second write (file exists, content should match except timestamp).
-	idx2 := indexer.BuildTimelineIndex(tasks, files)
+	idx2 := indexer.BuildTimelineIndex(tasks, files, time.Now())
 	if err := WriteTimelineRecent(idx2, dir); err != nil {
 		t.Fatalf("second write: %v", err)
 	}
@@ -232,7 +232,7 @@ func TestMissingPagesSortDeterministic(t *testing.T) {
 	// Run the build 10 times and check that the order is always the same.
 	var firstOrder []string
 	for i := 0; i < 10; i++ {
-		graph := indexer.BuildReferenceGraph(refs, files)
+		graph := indexer.BuildReferenceGraph(refs, files, time.Now())
 		idx := indexer.BuildMissingPagesIndex(graph, 5)
 
 		var names []string

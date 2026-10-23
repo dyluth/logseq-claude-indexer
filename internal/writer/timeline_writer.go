@@ -31,7 +31,7 @@ func WriteTimelineRecent(index *indexer.TimelineIndex, outputDir string) error {
 	// are seconds apart always produce the same set of included days.
 	// Journal dates are also parsed as UTC midnight (extractDateFromJournalPath),
 	// so an exact midnight-to-midnight comparison is what we want.
-	now := time.Now().UTC()
+	now := index.GeneratedAt.UTC()
 	sevenDaysAgo := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC).AddDate(0, 0, -7)
 	var recentDays []indexer.TimelineDay
 	for _, day := range index.Entries {

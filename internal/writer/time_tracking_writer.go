@@ -24,7 +24,7 @@ func WriteTimeTracking(index *indexer.TimeTrackingIndex, outputDir string) error
 
 	// Header
 	fmt.Fprintf(&buf, "# Time Tracking Analytics\n\n")
-	fmt.Fprintf(&buf, "Generated: %s\n\n", time.Now().UTC().Format(time.RFC3339))
+	fmt.Fprintf(&buf, "Generated: %s\n\n", index.GeneratedAt.UTC().Format(time.RFC3339))
 
 	// Overall Statistics
 	fmt.Fprintf(&buf, "## Summary\n\n")

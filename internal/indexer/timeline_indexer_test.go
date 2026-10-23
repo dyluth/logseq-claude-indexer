@@ -50,7 +50,7 @@ func TestBuildTimelineIndex(t *testing.T) {
 		},
 	}
 
-	index := BuildTimelineIndex(tasks, files)
+	index := BuildTimelineIndex(tasks, files, time.Now())
 
 	// Check that index was created
 	if index == nil {
@@ -95,7 +95,7 @@ func TestBuildTimelineIndex(t *testing.T) {
 }
 
 func TestBuildTimelineIndex_EmptyData(t *testing.T) {
-	index := BuildTimelineIndex([]models.Task{}, []models.File{})
+	index := BuildTimelineIndex([]models.Task{}, []models.File{}, time.Now())
 
 	if index == nil {
 		t.Fatal("BuildTimelineIndex returned nil")
@@ -123,7 +123,7 @@ func TestBuildTimelineIndex_NoJournalFiles(t *testing.T) {
 		},
 	}
 
-	index := BuildTimelineIndex(tasks, files)
+	index := BuildTimelineIndex(tasks, files, time.Now())
 
 	if len(index.Entries) != 0 {
 		t.Errorf("Expected 0 entries (no journal files), got %d", len(index.Entries))

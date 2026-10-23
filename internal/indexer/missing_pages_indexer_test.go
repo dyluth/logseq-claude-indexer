@@ -2,6 +2,7 @@ package indexer
 
 import (
 	"testing"
+	"time"
 
 	"github.com/dyluth/logseq-claude-indexer/pkg/models"
 )
@@ -30,7 +31,7 @@ func TestBuildMissingPagesIndex(t *testing.T) {
 		{Path: "pages/Page C.md", Type: models.FileTypePage},
 	}
 
-	graph := BuildReferenceGraph(refs, files)
+	graph := BuildReferenceGraph(refs, files, time.Now())
 
 	// Build missing pages index with threshold of 5
 	index := BuildMissingPagesIndex(graph, 5)
@@ -73,7 +74,7 @@ func TestBuildMissingPagesIndex_NoMissingPages(t *testing.T) {
 		{Path: "pages/Page B.md", Type: models.FileTypePage},
 	}
 
-	graph := BuildReferenceGraph(refs, files)
+	graph := BuildReferenceGraph(refs, files, time.Now())
 	index := BuildMissingPagesIndex(graph, 5)
 
 	if len(index.MissingPages) != 0 {
@@ -103,7 +104,7 @@ func TestBuildMissingPagesIndex_ThresholdFiltering(t *testing.T) {
 		{Path: "pages/A.md", Type: models.FileTypePage},
 	}
 
-	graph := BuildReferenceGraph(refs, files)
+	graph := BuildReferenceGraph(refs, files, time.Now())
 	index := BuildMissingPagesIndex(graph, 5)
 
 	// Should only include "Missing 10" (10 refs), not "Missing 3" (3 refs)
@@ -185,7 +186,7 @@ func TestMissingPagesIndex_ReferencedFromLimit(t *testing.T) {
 		{Path: "pages/A.md", Type: models.FileTypePage},
 	}
 
-	graph := BuildReferenceGraph(refs, files)
+	graph := BuildReferenceGraph(refs, files, time.Now())
 	index := BuildMissingPagesIndex(graph, 5)
 
 	if len(index.MissingPages) != 1 {
@@ -230,7 +231,7 @@ func TestMissingPagesIndex_Sorting(t *testing.T) {
 		{Path: "pages/A.md", Type: models.FileTypePage},
 	}
 
-	graph := BuildReferenceGraph(refs, files)
+	graph := BuildReferenceGraph(refs, files, time.Now())
 	index := BuildMissingPagesIndex(graph, 5)
 
 	if len(index.MissingPages) != 3 {

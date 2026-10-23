@@ -38,7 +38,7 @@ func TestWriteTaskIndex(t *testing.T) {
 		},
 	}
 
-	index := indexer.BuildTaskIndex(tasks)
+	index := indexer.BuildTaskIndex(tasks, time.Now())
 
 	// Write to temp directory
 	tmpDir := t.TempDir()
@@ -96,7 +96,7 @@ func TestWriteReferenceGraph(t *testing.T) {
 		{SourcePage: "Page A", TargetPage: "Page B"},
 	}
 
-	graph := indexer.BuildReferenceGraph(refs, files)
+	graph := indexer.BuildReferenceGraph(refs, files, time.Now())
 
 	// Write to temp directory
 	tmpDir := t.TempDir()
@@ -164,7 +164,7 @@ func TestFormatDuration(t *testing.T) {
 
 func TestWriteTaskIndex_EmptyIndex(t *testing.T) {
 	// Create empty index
-	index := indexer.BuildTaskIndex([]models.Task{})
+	index := indexer.BuildTaskIndex([]models.Task{}, time.Now())
 
 	// Write to temp directory
 	tmpDir := t.TempDir()
@@ -200,7 +200,7 @@ func TestWriteTaskIndex_EmptyIndex(t *testing.T) {
 
 func TestWriteReferenceGraph_NoFiles(t *testing.T) {
 	// Create empty graph
-	graph := indexer.BuildReferenceGraph([]models.PageReference{}, []models.File{})
+	graph := indexer.BuildReferenceGraph([]models.PageReference{}, []models.File{}, time.Now())
 
 	// Write to temp directory
 	tmpDir := t.TempDir()
@@ -232,7 +232,7 @@ func TestWriteTaskIndex_CreateDirectory(t *testing.T) {
 	tmpDir := t.TempDir()
 	outputDir := filepath.Join(tmpDir, "nested", "output")
 
-	index := indexer.BuildTaskIndex([]models.Task{})
+	index := indexer.BuildTaskIndex([]models.Task{}, time.Now())
 
 	err := WriteTaskIndex(index, outputDir)
 	if err != nil {
@@ -282,7 +282,7 @@ func TestWritePriorityIndex(t *testing.T) {
 		},
 	}
 
-	index := indexer.BuildTaskIndex(tasks)
+	index := indexer.BuildTaskIndex(tasks, time.Now())
 
 	// Write to temp directory
 	tmpDir := t.TempDir()
@@ -346,7 +346,7 @@ func TestWritePriorityIndex_NoHighPriority(t *testing.T) {
 		},
 	}
 
-	index := indexer.BuildTaskIndex(tasks)
+	index := indexer.BuildTaskIndex(tasks, time.Now())
 
 	// Write to temp directory
 	tmpDir := t.TempDir()

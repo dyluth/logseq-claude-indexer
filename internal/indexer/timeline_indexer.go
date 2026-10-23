@@ -26,9 +26,9 @@ type TimelineIndex struct {
 }
 
 // BuildTimelineIndex creates a timeline from tasks and files
-func BuildTimelineIndex(tasks []models.Task, files []models.File) *TimelineIndex {
+func BuildTimelineIndex(tasks []models.Task, files []models.File, now time.Time) *TimelineIndex {
 	index := &TimelineIndex{
-		GeneratedAt: time.Now(),
+		GeneratedAt: now,
 	}
 
 	// Group tasks by date (from journal file path or logbook)

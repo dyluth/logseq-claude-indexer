@@ -8,7 +8,7 @@ import (
 )
 
 func TestBuildTimeTrackingIndex_EmptyTasks(t *testing.T) {
-	index := BuildTimeTrackingIndex([]models.Task{})
+	index := BuildTimeTrackingIndex([]models.Task{}, time.Now())
 
 	if index.TotalTimeLogged != 0 {
 		t.Errorf("Expected 0 total time, got %v", index.TotalTimeLogged)
@@ -37,7 +37,7 @@ func TestBuildTimeTrackingIndex_TasksWithoutTracking(t *testing.T) {
 		},
 	}
 
-	index := BuildTimeTrackingIndex(tasks)
+	index := BuildTimeTrackingIndex(tasks, time.Now())
 
 	if index.TotalTimeLogged != 0 {
 		t.Errorf("Expected 0 total time, got %v", index.TotalTimeLogged)
@@ -69,7 +69,7 @@ func TestBuildTimeTrackingIndex_SingleTask(t *testing.T) {
 		},
 	}
 
-	index := BuildTimeTrackingIndex(tasks)
+	index := BuildTimeTrackingIndex(tasks, time.Now())
 
 	expectedDuration := 2*time.Hour + 30*time.Minute
 
@@ -124,7 +124,7 @@ func TestBuildTimeTrackingIndex_MultipleProjects(t *testing.T) {
 		},
 	}
 
-	index := BuildTimeTrackingIndex(tasks)
+	index := BuildTimeTrackingIndex(tasks, time.Now())
 
 	if index.TotalTimeLogged != 10*time.Hour {
 		t.Errorf("Expected 10h total time, got %v", index.TotalTimeLogged)
@@ -211,7 +211,7 @@ func TestBuildTimeTrackingIndex_WeeklyAggregation(t *testing.T) {
 		},
 	}
 
-	index := BuildTimeTrackingIndex(tasks)
+	index := BuildTimeTrackingIndex(tasks, time.Now())
 
 	// Should have 3 weeks
 	if len(index.WeeklySummary) != 3 {
@@ -275,7 +275,7 @@ func TestBuildTimeTrackingIndex_ByStatusAndPriority(t *testing.T) {
 		},
 	}
 
-	index := BuildTimeTrackingIndex(tasks)
+	index := BuildTimeTrackingIndex(tasks, time.Now())
 
 	// Check by status
 	if index.ByStatus[models.StatusDONE] != 13*time.Hour {
@@ -321,7 +321,7 @@ func TestBuildTimeTrackingIndex_MixedTracking(t *testing.T) {
 		},
 	}
 
-	index := BuildTimeTrackingIndex(tasks)
+	index := BuildTimeTrackingIndex(tasks, time.Now())
 
 	if index.Statistics.TotalTasks != 3 {
 		t.Errorf("Expected 3 total tasks, got %d", index.Statistics.TotalTasks)
